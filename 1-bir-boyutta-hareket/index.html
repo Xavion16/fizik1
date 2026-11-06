@@ -1,0 +1,419 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Düz Bir Yolun Hikâyesi</title>
+<meta name="description" content="Bir boyutta düzgün doğrusal hareketi tahmin ederek ve deneyerek öğreten etkileşimli ders.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23f5f1e8'/%3E%3Cpath d='M4 26 28 6' stroke='%23e5341b' stroke-width='4'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f5f1e8;--ink:#141311;--red:#e5341b;--blue:#1546c0;--mut:#6f6a5e;--rule:#d5cebd;--mono:"JetBrains Mono",Consolas,monospace;--disp:"Instrument Serif",Georgia,serif}
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 19px/1.55 Newsreader,Georgia,serif;overflow-x:hidden}
+#bar{position:fixed;inset:0 auto auto 0;height:4px;background:var(--red);width:0;z-index:9}
+canvas{display:block;width:100%;touch-action:pan-y}
+.w{max-width:1240px;margin:auto;padding:0 28px}
+.hero{min-height:88vh;display:flex;flex-direction:column;justify-content:space-between;position:relative;border-bottom:2px solid var(--ink)}
+.hero canvas{position:absolute;inset:0;height:100%}
+.hero .w{position:relative;width:100%;margin:0 auto;pointer-events:none}.hero a{pointer-events:auto}
+.mast{display:flex;justify-content:space-between;gap:12px;font:700 12px var(--mono);padding-top:22px;flex-wrap:wrap}
+h1{font:400 clamp(66px,14.5vw,210px)/.86 var(--disp);letter-spacing:-.025em;margin:0 0 22px}
+h1 i{color:var(--red)}
+.hook{font-size:clamp(20px,2.2vw,28px);line-height:1.3;max-width:24em;margin:0 0 34px}
+.toc{display:flex;flex-wrap:wrap;gap:0 22px;font:400 13px var(--mono);padding-bottom:22px}
+.toc a{color:var(--ink);text-underline-offset:3px}.toc a:hover{color:var(--red)}
+.ch{padding:72px 0 28px;border-bottom:1px solid var(--rule)}
+.chgrid{display:grid;grid-template-columns:minmax(0,4fr) minmax(0,8fr);gap:44px;align-items:start}
+.num{font:400 clamp(90px,11vw,150px)/.8 var(--disp);color:var(--red);margin:0 0 12px}
+h2{font:400 clamp(38px,4.6vw,60px)/1 var(--disp);letter-spacing:-.015em;margin:0 0 16px}
+.ch p{margin:0 0 14px}
+.note{border-left:3px solid var(--red);padding:2px 0 2px 14px;font-style:italic}
+.eq{font:700 19px var(--mono);margin:14px 0;overflow-wrap:anywhere}
+.inst{border:2px solid var(--ink);background:#fbf8f1;min-width:0}
+.inst canvas{border-bottom:2px solid var(--ink)}
+.ctl{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px 22px;padding:14px 16px}
+.f label{display:flex;justify-content:space-between;gap:8px;font:400 13px var(--mono)}.f output{font-weight:700}
+input[type=range]{width:100%;accent-color:var(--red);margin:6px 0 0}
+.read{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));border-top:1px solid var(--rule)}
+.read div{padding:9px 16px;font:400 12px var(--mono);color:var(--mut);border-right:1px solid var(--rule)}
+.read b{display:block;font:700 19px var(--mono);color:var(--ink)}
+.btns{display:flex;flex-wrap:wrap;gap:8px;padding:0 16px 14px}
+button{font:700 13px var(--mono);padding:9px 14px;background:transparent;border:2px solid var(--ink);color:var(--ink);cursor:pointer}
+button:hover{background:var(--ink);color:var(--bg)}button.go{background:var(--red);border-color:var(--red);color:#fff}button.go:hover{background:var(--ink);border-color:var(--ink)}
+button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+.guess{border:2px solid var(--ink);padding:16px;margin:0 0 16px;background:#fff}
+.guess h3{font:700 12px var(--mono);margin:0 0 6px;color:var(--red)}
+.guess p{font-size:20px;line-height:1.3}
+.guess .o{display:flex;flex-wrap:wrap;gap:8px}
+.guess .o button{font-weight:400}
+.guess .o .yes{background:#1d7a3e;border-color:#1d7a3e;color:#fff}.guess .o .no{background:var(--red);border-color:var(--red);color:#fff}
+.after{display:none;margin-top:12px;font-size:18px}.guess.done .after{display:block}
+.game canvas{height:470px}
+#gMsg{padding:12px 16px;font:400 14px var(--mono);min-height:46px}
+.q{padding:22px 0;border-top:1px solid var(--rule)}.q h3{font:400 clamp(25px,2.8vw,33px)/1.12 var(--disp);margin:0 0 12px}
+.q .o{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px}
+.q button{text-align:left;font-weight:400}.q button:disabled{cursor:default}.q button:disabled:hover{background:transparent;color:var(--ink)}
+.q .yes,.q .yes:disabled:hover{background:#1d7a3e!important;border-color:#1d7a3e;color:#fff!important}.q .no,.q .no:disabled:hover{background:var(--red)!important;border-color:var(--red);color:#fff!important}
+.q .why{margin:12px 0 0;font-size:18px}
+#me{background:var(--ink);color:var(--bg);padding:80px 0;margin-top:60px}
+#me .chgrid{align-items:center}
+.mono{font:400 clamp(120px,19vw,250px)/.75 var(--disp);color:var(--red)}
+#me h2{color:var(--bg)}#me small{font:400 12px var(--mono);color:#aaa49a;display:block;margin-top:22px}
+@media(max-width:860px){.chgrid{grid-template-columns:minmax(0,1fr);gap:22px}.w{padding:0 16px}.ch{padding-top:48px}.game canvas{height:400px}body{font-size:18px}}
+</style>
+
+<style id="x-style">
+.ctl{grid-template-columns:repeat(auto-fit,minmax(215px,1fr))!important}
+.slcap{grid-column:1/-1;font:600 13px/1.35 var(--x-body);color:var(--x-soft);display:flex;gap:8px;align-items:center}
+.slcap::before{content:"";width:10px;height:10px;background:var(--x-accent);border-radius:var(--x-dot);flex:none}
+.ctl .f label{font:700 14px/1.25 var(--x-body);color:inherit;align-items:baseline;margin-bottom:6px}
+.ctl .f label output{font:700 18px var(--mono);white-space:nowrap;color:inherit}
+.slrow{display:flex;align-items:center;gap:7px}
+.slrow button{flex:none;width:36px;height:36px;padding:0;font:700 20px/1 var(--mono);border-radius:var(--x-r);box-shadow:none!important;transform:none!important;touch-action:manipulation;user-select:none}
+input[type=range].sl{-webkit-appearance:none;appearance:none;flex:1;min-width:0;height:36px;margin:0;background:transparent;cursor:ew-resize;touch-action:none}
+.sl::-webkit-slider-runnable-track{height:12px;border-radius:var(--x-r);border:var(--x-track-bd);background:linear-gradient(to right,var(--x-rest) var(--a),var(--x-accent) var(--a),var(--x-accent) var(--b),var(--x-rest) var(--b))}
+.sl::-moz-range-track{height:12px;border-radius:var(--x-r);border:var(--x-track-bd);background:linear-gradient(to right,var(--x-rest) var(--a),var(--x-accent) var(--a),var(--x-accent) var(--b),var(--x-rest) var(--b))}
+.sl::-webkit-slider-thumb{-webkit-appearance:none;width:26px;height:26px;margin-top:-8px;border-radius:var(--x-dot);background:var(--x-thumb);border:3px solid var(--x-thumb-bd);box-shadow:0 2px 6px #0006;cursor:grab}
+.sl::-moz-range-thumb{width:20px;height:20px;border-radius:var(--x-dot);background:var(--x-thumb);border:3px solid var(--x-thumb-bd);box-shadow:0 2px 6px #0006;cursor:grab}
+.slscale{position:relative;height:16px;margin:0 43px;font:400 11px var(--mono);color:var(--x-soft)}
+.slscale span{position:absolute;top:0;white-space:nowrap}.slscale .mn{left:0}.slscale .mx{right:0}.slscale .zr{transform:translateX(-50%)}
+.slhint{margin:4px 0 0!important;font:400 13px/1.35 var(--x-body)!important;color:var(--x-soft)!important}
+.xs{padding-top:72px;padding-bottom:6px}
+.xs h2{margin-bottom:10px}
+.xlead{max-width:62ch;margin:0 0 18px;color:var(--x-soft)}
+.xbox{background:var(--x-card);color:var(--x-ink);border:var(--x-bd);border-radius:var(--x-rb);padding:22px;box-shadow:var(--x-sh)}
+.xm{display:grid;grid-template-columns:minmax(0,3fr) minmax(0,2fr);gap:26px}
+.xq{font:600 clamp(20px,2.2vw,26px)/1.3 var(--x-body);margin:0 0 16px}
+.xin{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.xin input{width:150px;padding:10px 12px;font:700 18px var(--mono);border:var(--x-bd);border-radius:var(--x-r);background:var(--x-field);color:var(--x-ink)}
+.xin span{font:700 15px var(--mono)}
+.xbox button{cursor:pointer}
+.xres{margin-top:14px;font:700 16px var(--x-body);min-height:24px}.xres.ok{color:var(--x-ok)}.xres.bad{color:var(--x-bad)}
+.xsteps{margin:10px 0 0;padding-left:22px;font:400 15px/1.65 var(--mono);overflow-wrap:anywhere}.xsteps li{margin-bottom:4px}
+.xstat{display:grid;grid-template-columns:1fr 1fr;gap:10px;align-content:start}
+.xstat div{border:var(--x-bd);border-radius:var(--x-r);padding:12px;font:400 12px var(--mono);color:var(--x-soft)}.xstat b{display:block;font:700 30px/1.1 var(--mono);color:var(--x-ink)}
+.xstat p{grid-column:1/-1;margin:4px 0 0;font:400 14px/1.45 var(--x-body);color:var(--x-soft)}
+.xex{font:600 clamp(18px,2vw,23px)/1.35 var(--x-body);margin:0 0 14px}
+.xdo{list-style:none;margin:0 0 14px;padding:0}.xdo li{padding:12px 0;border-top:1px solid var(--x-line);display:grid;grid-template-columns:32px minmax(0,1fr);gap:8px;font-size:16px}
+.xdo li>i{font:700 16px var(--mono);font-style:normal;color:var(--x-accent-t)}.xdo code{display:block;font:700 15px/1.6 var(--mono);margin-top:3px;white-space:normal}
+.xcards{display:grid;grid-template-columns:repeat(auto-fill,minmax(235px,1fr));gap:14px}
+.xc{perspective:900px;height:190px;padding:0!important;background:none!important;border:0!important;box-shadow:none!important;transform:none!important;color:var(--x-ink);text-align:left;font:inherit;cursor:pointer}
+.xci{position:relative;display:block;width:100%;height:100%;transition:transform .45s;transform-style:preserve-3d}
+.xc.fl .xci{transform:rotateY(180deg)}
+.xf{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:space-between;padding:16px;backface-visibility:hidden;-webkit-backface-visibility:hidden;border:var(--x-bd);border-radius:var(--x-rb);background:var(--x-card)}
+.xf b{font:700 21px/1.15 var(--x-body)}.xf small{font:400 11px var(--mono);color:var(--x-soft)}
+.xf.bk{transform:rotateY(180deg);background:var(--x-accent);color:var(--x-accent-ink);font:600 15px/1.4 var(--x-body);border-color:var(--x-accent)}
+.xf.bk small{color:inherit;opacity:.75}
+.xmail{display:inline-block;margin-top:6px;font:700 clamp(15px,1.8vw,20px) var(--mono);color:inherit;overflow-wrap:anywhere}
+@media(prefers-reduced-motion:reduce){.xci{transition:none}}
+@media(max-width:820px){.xm{grid-template-columns:minmax(0,1fr)}.xbox{padding:16px}.xcards{grid-template-columns:repeat(auto-fill,minmax(160px,1fr))}.xc{height:220px}.xf b{font-size:18px}.xf.bk{font-size:14px}}
+</style>
+<style>:root{--x-body:Newsreader,Georgia,serif;--x-card:#fbf8f1;--x-ink:#141311;--x-soft:#6f6a5e;--x-line:#d5cebd;--x-accent:#e5341b;--x-accent-t:#e5341b;--x-accent-ink:#fff;--x-rest:#ded7c6;--x-thumb:#141311;--x-thumb-bd:#fbf8f1;--x-track-bd:0;--x-r:0;--x-rb:0;--x-dot:50%;--x-bd:2px solid #141311;--x-sh:none;--x-field:#fff;--x-ok:#1d7a3e;--x-bad:#e5341b}</style>
+<style>.xlinks{margin:18px 0 0;display:flex;flex-wrap:wrap;gap:6px 16px;font:700 14px var(--mono)}.xlinks a{color:inherit;text-underline-offset:3px}.xlinks span{width:100%;font-weight:400}</style>
+</head>
+<body>
+<div id="bar"></div>
+<section class="hero">
+  <canvas id="hero" aria-hidden="true"></canvas>
+  <div class="w mast"><span>FİZİK 1 · DERS 01</span><span>BİR BOYUTTA DÜZGÜN DOĞRUSAL HAREKET</span></div>
+  <div class="w">
+    <h1>Düz bir<br>yolun <i>hikâyesi</i></h1>
+    <p class="hook">Grafikteki çizgi, aracın gittiği yolun resmi değildir. Bu dersin sonunda o çizgiye bakıp aracın ne yaptığını anlatabileceksin.</p>
+    <nav class="toc" aria-label="Bölümler"><a href="#c1">01 Konum</a><a href="#c2">02 Yol ve yer değiştirme</a><a href="#c3">03 Eğim</a><a href="#c4">04 Alan</a><a href="#c5">05 Buluşma</a><a href="#c6">06 İvme</a><a href="#c7">07 Oyun</a><a href="#c8">08 Test</a><a href="#xm">Soru makinesi</a><a href="#xe">Çözümlü örnek</a><a href="#xk">Bilgi kartları</a><a href="#me">Hakkımda</a></nav>
+  </div>
+</section>
+
+<section class="ch" id="c1"><div class="w chgrid">
+  <div><div class="num">1</div><h2>Konum, seçtiğin sıfıra bağlıdır</h2>
+    <p>Bir boyutta her yer tek bir sayıyla söylenir: <b>x</b>. O sayı, nereyi sıfır seçtiğine göre değişir.</p>
+    <p>Aracı sürükle, sonra sıfır noktasını kaydır. Konumlar değişirken <b>Δx = x<sub>son</sub> − x<sub>ilk</sub></b> sabit kalıyor mu, izle.</p>
+    <p class="note">Yer değiştirme gerçek bir olayı anlatır, koordinat seçimine bağlı değildir.</p></div>
+  <div class="inst"><canvas id="c1c" style="height:210px" role="img" aria-label="Sayı doğrusu üzerinde araç"></canvas>
+    <div class="ctl"><div class="f" data-s="o|Sıfır noktasını kaydır|-60|60|5|0|m"></div></div>
+    <div class="read"><div>x<sub>ilk</sub> (bayrak)<b id="r1a"></b></div><div>x<sub>son</sub> (araç)<b id="r1b"></b></div><div>Δx<b id="r1d"></b></div></div></div>
+</div></section>
+
+<section class="ch" id="c2"><div class="w chgrid">
+  <div><div class="num">2</div><h2>Çok yol almak, çok yer değiştirmek değildir</h2>
+    <p><b>Yol</b> kilometre sayacıdır, hep artar. <b>Yer değiştirme</b> başlangıçla bitiş arasındaki farktır ve negatif olabilir.</p>
+    <div class="eq">sürat = yol / Δt<br>v̄ = Δx / Δt</div>
+    <p class="note">Sınavda sorulan “ortalama hız” ise yolu değil, Δx'i kullan.</p></div>
+  <div>
+    <div class="guess" data-guess="c2"><h3>ÖNCE TAHMİN ET</h3><p>Araç 100 m ileri, sonra 40 m geri gidiyor. Toplam 20 s sürüyor. Ortalama hızı kaç?</p>
+      <div class="o"><button>7 m/s</button><button data-ok>3 m/s</button><button>5 m/s</button></div>
+      <div class="after">Δx = 100 − 40 = 60 m olduğu için v̄ = 60/20 = <b>3 m/s</b>. 7 m/s dediysen ortalama sürati buldun (140/20). İkisi aynı hareketin iki farklı ölçümü. Şimdi aşağıdaki deneyi oynat.</div></div>
+    <div class="inst"><canvas id="c2c" style="height:190px" role="img" aria-label="İleri giden ve geri dönen araç"></canvas>
+      <div class="ctl"><div class="f" data-s="fw|İleri|20|140|10|100|m"></div><div class="f" data-s="bk|Geri|0|140|10|40|m"></div></div>
+      <div class="btns"><button class="go" id="p2">▶ Yolculuğu başlat</button></div>
+      <div class="read"><div>Süre<b id="r2t"></b></div><div>Yol<b id="r2p"></b></div><div>Δx<b id="r2d"></b></div><div>Ort. sürat<b id="r2s"></b></div><div>Ort. hız<b id="r2v"></b></div></div></div>
+  </div>
+</div></section>
+
+<section class="ch" id="c3"><div class="w chgrid">
+  <div><div class="num">3</div><h2>Çizginin eğimi, aracın hızıdır</h2>
+    <p>Yolu dik çevirip grafiğin yanına koyduk. Aracın yüksekliği grafikteki x değeridir. Zaman sağa aktıkça araç kendi çizgisini çiziyor.</p>
+    <p>Yoldaki işaretler her saniye bırakılır. <b>Aralıkların eşit olması, hızın sabit olduğunun kanıtıdır.</b></p>
+    <div class="eq">x = x₀ + v·t</div>
+    <p>Grafikteki iki kırmızı tutamacı sürükle. Üçgeni nerede ve ne kadar büyük çizersen çiz, Δx/Δt aynı çıkar. “Sabit hız” tam olarak bu demektir.</p>
+    <p class="note">Düz çizgi aracın düz gittiğini anlatmaz. Her bir boyutlu hareket zaten düz yoldadır; çizgi sadece zamanı gösterir.</p></div>
+  <div class="inst"><canvas id="c3c" style="height:440px" role="img" aria-label="Dik yol ve konum zaman grafiği"></canvas>
+    <div class="ctl"><div class="f" data-s="x0|x₀ başlangıç|0|40|5|10|m"></div><div class="f" data-s="v|v hız|-8|10|1|6|m/s"></div></div>
+    <div class="btns"><button class="go" id="p3">▶ Aracı sür</button></div>
+    <div class="read"><div>Δx<b id="r3x"></b></div><div>Δt<b id="r3t"></b></div><div>Eğim = Δx/Δt<b id="r3s"></b></div></div></div>
+</div></section>
+
+<section class="ch" id="c4"><div class="w chgrid">
+  <div><div class="num">4</div><h2>Hız grafiğinin altındaki alan, yer değiştirmedir</h2>
+    <p>Üstteki grafik hız, alttaki konum. Üstte <b>hız çubuklarını yukarı aşağı sürükle</b>; altta konumun nasıl çizildiğini izle.</p>
+    <p>Hız yüksekse konum dik çıkar. Hız sıfırsa konum yatay kalır. Hız negatifse konum iner. Her dikdörtgen v·Δt kadar alan tutar ve tam o kadar konum değiştirir.</p>
+    <div class="eq">Δx = alan(v-t)</div>
+    <div class="guess" style="margin-top:16px"><h3>GÖREV</h3><p id="m4" style="margin:0">Araç hareket etsin ama 10 saniye sonunda başladığı yere dönsün.</p></div></div>
+  <div class="inst"><canvas id="c4c" style="height:500px" role="img" aria-label="Hız ve konum grafikleri"></canvas>
+    <div class="read"><div>Δx (net alan)<b id="r4d"></b></div><div>Toplam yol<b id="r4p"></b></div><div>Ort. hız<b id="r4v"></b></div></div></div>
+</div></section>
+
+<section class="ch" id="c5"><div class="w chgrid">
+  <div><div class="num">5</div><h2>Buluşma, iki denklemin eşitliğidir</h2>
+    <p>İki araç aynı anda aynı konumdaysa buluşmuştur. Grafikte bu, iki çizginin kesiştiği noktadır. Cebirde ise iki konum denklemini eşitlemektir.</p>
+    <div class="eq" id="alg" aria-live="polite"></div></div>
+  <div>
+    <div class="guess" data-guess="c5"><h3>ÖNCE TAHMİN ET</h3><p>A 15 m/s, B 10 m/s ile aralarında 200 m varken birbirine doğru gidiyor. Nerede karşılaşırlar?</p>
+      <div class="o"><button>Tam ortada</button><button>A'nın başladığı yere daha yakın</button><button data-ok>B'nin başladığı yere daha yakın</button></div>
+      <div class="after">Süre ikisi için aynıdır, hızlı olan daha çok yol alır. A 8 saniyede 120 m, B ise 80 m gider. Karşılaşma B'nin başladığı yere daha yakındır.</div></div>
+    <div class="inst"><canvas id="c5c" style="height:400px" role="img" aria-label="İki aracın yolu ve grafiği"></canvas>
+      <div class="ctl"><div class="f" data-s="d|Aradaki mesafe|50|400|10|200|m"></div><div class="f" data-s="va|v_A|1|30|1|15|m/s"></div><div class="f" data-s="vb|v_B (− sola doğru)|-30|30|1|-10|m/s"></div></div>
+      <div class="btns"><button class="go" id="p5">▶ Oynat</button></div></div>
+  </div>
+</div></section>
+
+<section class="ch" id="c6"><div class="w chgrid">
+  <div><div class="num">6</div><h2>Bir adım öte: hız değişirse</h2>
+    <p>Buraya kadar ivme sıfırdı. İvmeyi açınca hız grafiği eğimli, konum grafiği eğri olur. Kural değişmez: <b>konumun eğimi hız, hızın eğimi ivmedir</b>. Alan da hâlâ Δx verir.</p>
+    <div class="eq">v = v₀ + a·t<br>x = v₀t + ½at²<br>v² = v₀² + 2aΔx</div>
+    <p>a = 0 yap: konum grafiği yeniden düz çizgiye döner. Düzgün doğrusal hareket, bu denklemlerin özel halidir.</p></div>
+  <div class="inst"><canvas id="c6c" style="height:320px" role="img" aria-label="Sabit ivmeli hareket grafikleri"></canvas>
+    <div class="ctl"><div class="f" data-s="v6|v₀|-10|20|1|4|m/s"></div><div class="f" data-s="a6|a|-4|4|0.5|1.5|m/s²"></div></div>
+    <div class="read"><div>10 s sonra v<b id="r6v"></b></div><div>10 s sonra Δx<b id="r6x"></b></div></div></div>
+</div></section>
+
+<section class="ch" id="c7"><div class="w chgrid">
+  <div><div class="num">7</div><h2>Oyun: Çizgiyi sür</h2>
+    <p>Zaman kendi akar, sen sadece aracı yönetirsin. Kesikli çizgiyi takip et. Fareyle ya da parmağınla grafiğin üstünde yukarı aşağı hareket et; klavyede ↑ ↓ de çalışır.</p>
+    <p>Bir grafiği elinle sürdüğünde eğimin hız demek olduğunu unutmazsın: yatay kısımda durmak, dik kısımda hızlanmak zorundasın.</p></div>
+  <div class="inst game"><canvas id="gc" role="application" aria-label="Çizgi takip oyunu" tabindex="0"></canvas>
+    <div id="gMsg" aria-live="polite">Bir seviye seç ve başla.</div>
+    <div class="btns"><button class="go" data-l="0">Seviye 1: Sabit hız</button><button data-l="1">Seviye 2: Dur-kalk</button><button data-l="2">Seviye 3: Geri dönüş</button></div></div>
+</div></section>
+
+<section class="ch" id="c8"><div class="w chgrid">
+  <div><div class="num">8</div><h2>Şimdi sıra sende</h2><p>Bu sorular formül ezberini değil, anlamayı ölçer. Her şıktan sonra nedenini de görürsün.</p><p class="eq" id="qs"></p></div>
+  <div id="quiz"></div>
+</div></section>
+
+
+<section class="xs w" id="xm"><h2>Soru makinesi</h2><p class="xlead">Sayılar her seferinde değişir, soru hiç bitmez. Kâğıda çöz, cevabını yaz ve çözümü kontrol et. </p>
+<div class="xbox xm"><div><p class="xq" id="xmq"></p><div class="xin"><input id="xmi" inputmode="decimal" autocomplete="off" aria-label="Cevabın"><span id="xmu"></span><button class="go" id="xmc" type="button">Kontrol et</button><button id="xmn" type="button">Çözümü gör / geç</button></div><div class="xres" id="xmr" aria-live="polite"></div><ol class="xsteps" id="xms"></ol></div>
+<div class="xstat"><div>Doğru<b id="xm1">0 / 0</b></div><div>Seri<b id="xm2">0</b></div><p>Üst üste doğru yapabildiğin kadar devam et. Sınavdan önce 10'luk seri iyi bir hedef.</p></div></div></section>
+<section class="xs w" id="xe"><h2>Çözümlü örnek</h2><p class="xlead">Sınav tipi bir soru. Her adımdan önce durup kendin dene, sonra açıp karşılaştır.</p>
+<div class="xbox"><p class="xex" id="xeq"></p><ol class="xdo" id="xel"></ol><button class="go" id="xen" type="button"></button></div></section>
+<section class="xs w" id="xk"><h2>Bilgi kartları</h2><p class="xlead">Kavramı önce kendin tanımla, sonra kartı çevirip kontrol et.</p><div class="xcards" id="xcs"></div></section>
+<section id="me"><div class="w chgrid">
+  <div class="mono">K</div>
+  <div><h2>Hakkımda</h2><p>Ben Kadir Kara. Fizik 1 dersinde işlediğimiz her konu için bir etkileşimli çalışma hazırlıyorum; bu site onlardan biri.</p><p>Amacım formülleri ezberlemek yerine ne anlattıklarını deneyerek görmek. Bu yüzden her bölümde önce tahmin etmeni istiyorum: yanlış bir tahmin, doğru cevabı okumaktan çoğu zaman daha çok şey öğretir.</p><p>Diğer projelerim için bana yazabilirsin:<br><a class="xmail" href="mailto:kadirkara1643@gmail.com">kadirkara1643@gmail.com</a></p><nav class="xlinks" aria-label="Diğer dersler"><span>Diğer dersler:</span><a href="../2-vektorler/">Vektörler</a><a href="../3-iki-boyutta-hareket/">İki boyutta hareket</a><a href="../4-hareket-yasalari/">Hareket yasaları</a><a href="../">Tüm dersler</a></nav><small>Fizik 1 · Ödev projesi</small></div>
+</div></section>
+
+<script>
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const INK='#141311',RED='#e5341b',BLUE='#1546c0',MUT='#6f6a5e',RULE='#d5cebd',MONO='"JetBrains Mono",monospace';
+const fmt=(n,d=0)=>{if(Math.abs(n)<.5*10**-d)n=0;return n.toFixed(d).replace('.',',').replace('-','−')};
+const P={};const views=[];
+$$('[data-s]').forEach(e=>{const[id,l,mn,mx,st,v,u]=e.dataset.s.split('|');P[id]=+v;e.innerHTML=`<label for="s_${id}">${l}<output id="o_${id}">${fmt(+v,st<1?1:0)} ${u}</output></label><input id="s_${id}" type="range" min="${mn}" max="${mx}" step="${st}" value="${v}">`;
+ e.querySelector('input').oninput=ev=>{P[id]=+ev.target.value;$('#o_'+id).textContent=fmt(P[id],st<1?1:0)+' '+u;e.dispatchEvent(new Event('ch',{bubbles:true}));drawAll()}});
+function view(id,fn){const c=$(id),v={c,draw(){const r=c.getBoundingClientRect(),d=devicePixelRatio||1;if(!r.width)return;c.width=r.width*d;c.height=r.height*d;const g=c.getContext('2d');g.setTransform(d,0,0,d,0,0);g.lineCap='round';fn(g,r.width,r.height)}};views.push(v);return v}
+const drawAll=()=>views.forEach(v=>v.draw());
+function pointer(c,fn){let on=false;c.style.touchAction='none';const xy=e=>{const r=c.getBoundingClientRect();return[e.clientX-r.left,e.clientY-r.top]};
+ c.addEventListener('pointerdown',e=>{on=true;c.setPointerCapture(e.pointerId);fn(...xy(e),'down')});c.addEventListener('pointermove',e=>{if(on)fn(...xy(e),'move')});c.addEventListener('pointerup',()=>{on=false;fn(0,0,'up')});c.addEventListener('pointercancel',()=>{on=false})}
+const nice=(r,n)=>{const a=r/n,p=10**Math.floor(Math.log10(a||1)),m=a/p;return(m<1.5?1:m<3?2:m<7?5:10)*p};
+function plot(g,b,x0,x1,y0,y1,xl,yl,grid=true){
+ const sx=x=>b.x+(x-x0)/(x1-x0)*b.w,sy=y=>b.y+b.h-(y-y0)/(y1-y0)*b.h;
+ g.font='11px '+MONO;g.lineWidth=1;const dx=nice(x1-x0,b.w<300?4:8),dy=nice(y1-y0,b.h<130?3:5);
+ g.textAlign='center';g.textBaseline='top';for(let x=Math.ceil(x0/dx)*dx;x<=x1+1e-9;x+=dx){if(grid){g.strokeStyle='#e9e3d5';g.beginPath();g.moveTo(sx(x),b.y);g.lineTo(sx(x),b.y+b.h);g.stroke()}g.fillStyle=MUT;g.fillText(fmt(x),sx(x),b.y+b.h+4)}
+ g.textAlign='right';g.textBaseline='middle';for(let y=Math.ceil(y0/dy)*dy;y<=y1+1e-9;y+=dy){if(grid){g.strokeStyle='#e9e3d5';g.beginPath();g.moveTo(b.x,sy(y));g.lineTo(b.x+b.w,sy(y));g.stroke()}g.fillStyle=MUT;g.fillText(fmt(y),b.x-5,sy(y))}
+ g.strokeStyle=INK;g.lineWidth=1.5;g.beginPath();const zy=sy(Math.max(y0,Math.min(y1,0)));g.moveTo(b.x,b.y);g.lineTo(b.x,b.y+b.h);g.moveTo(b.x,zy);g.lineTo(b.x+b.w,zy);g.stroke();
+ g.fillStyle=INK;g.textAlign='left';g.textBaseline='bottom';g.fillText(yl,b.x+5,b.y+12);g.textAlign='right';g.fillText(xl,b.x+b.w,b.y+b.h-3);return{sx,sy}}
+function car(g,x,y,col,dir=1,w=38,h=17){g.save();g.translate(x,y);g.scale(dir,1);g.fillStyle=col;g.beginPath();g.roundRect(-w/2,-h/2,w,h,4);g.fill();g.fillStyle='#fff';g.fillRect(w*.08,-h/2+3,w*.25,h-6);g.restore()}
+function line(g,x1,y1,x2,y2,c=INK,w=2,dash=[]){g.strokeStyle=c;g.lineWidth=w;g.setLineDash(dash);g.beginPath();g.moveTo(x1,y1);g.lineTo(x2,y2);g.stroke();g.setLineDash([])}
+function text(g,s,x,y,c=INK,al='left',f='12px '+MONO){g.fillStyle=c;g.font=f;g.textAlign=al;g.textBaseline='middle';g.fillText(s,x,y)}
+// animasyon yöneticisi
+function runner(dur,onT,btn,label){const o={t:0,on:false,start(){if(o.t>=dur())o.t=0;o.on=true;o.last=performance.now();requestAnimationFrame(o.tick)},stop(){o.on=false;if(btn)btn.textContent=label},tick(n){if(!o.on)return;o.t=Math.min(dur(),o.t+(n-o.last)/1000);o.last=n;onT();if(o.t>=dur())return o.stop();requestAnimationFrame(o.tick)}};if(btn)btn.onclick=()=>{if(o.on)o.stop();else{btn.textContent='❚❚ Duraklat';o.start()}};return o}
+
+// tahmin kutuları
+$$('[data-guess]').forEach(b=>{const bs=[...b.querySelectorAll('.o button')];bs.forEach(x=>x.onclick=()=>{if(b.classList.contains('done'))return;b.classList.add('done');bs.find(y=>'ok'in y.dataset).classList.add('yes');if(!('ok'in x.dataset))x.classList.add('no');drawAll()})});
+
+// kahraman animasyonu
+let hT=0;const hv=view('#hero',(g,w,h)=>{const y=h*.13+18,per=(hT%14)/14,M=30;for(let i=0;i<=28;i++){const px=M+i/28*(w-2*M);if(i/28<=per){g.fillStyle=RED;g.fillRect(px-1,y-13,2,26)}else{g.fillStyle=RULE;g.fillRect(px-.5,y-6,1,12)}}car(g,M+per*(w-2*M),y,RED)});
+const still=matchMedia('(prefers-reduced-motion:reduce)').matches;
+(function hl(n){if(!still){hT=n/1000;if(scrollY<innerHeight)hv.draw();requestAnimationFrame(hl)}})(0);
+addEventListener('scroll',()=>{$('#bar').style.width=100*scrollY/(document.documentElement.scrollHeight-innerHeight)+'%'},{passive:true});
+
+// 1
+let carR=70;const FLAG=-40;
+const v1=view('#c1c',(g,w,h)=>{const sx=x=>w/2+x*(w-50)/240,y=h*.52;
+ g.fillStyle='#ece6d6';g.fillRect(0,y-30,w,60);line(g,0,y+30,w,y+30,INK,2);
+ for(let i=-20;i<=20;i++){const real=i*10+P.o;if(Math.abs(real)>125)continue;const X=sx(real),big=i%2===0;line(g,X,y+30,X,y+(big?40:35),INK,1);if(big)text(g,fmt(i*10),X,y+50,i===0?RED:MUT,'center','11px '+MONO)}
+ const O=sx(P.o);line(g,O,y-44,O,y+32,RED,2);text(g,'x = 0',O,y-54,RED,'center','700 12px '+MONO);
+ const F=sx(FLAG);line(g,F,y-26,F,y+30,INK,2);g.fillStyle=INK;g.beginPath();g.moveTo(F,y-26);g.lineTo(F+18,y-19);g.lineTo(F,y-12);g.fill();
+ const C=sx(carR);car(g,C,y,INK);
+ line(g,F,y-68+h*.03,C,y-68+h*.03,BLUE,2);g.fillStyle=BLUE;const s=C>F?1:-1,ay=y-68+h*.03;if(Math.abs(C-F)>8){g.beginPath();g.moveTo(C,ay);g.lineTo(C-s*8,ay-5);g.lineTo(C-s*8,ay+5);g.fill()}
+ const a=FLAG-P.o,b=carR-P.o;$('#r1a').textContent=fmt(a)+' m';$('#r1b').textContent=fmt(b)+' m';$('#r1d').textContent=fmt(b-a)+' m'});
+pointer($('#c1c'),(x,y,k)=>{if(k==='up')return;const w=$('#c1c').clientWidth;carR=Math.max(-115,Math.min(115,Math.round((x-w/2)/((w-50)/240)/5)*5));v1.draw()});
+
+// 2
+const SP=7;const dur2=()=>(P.fw+P.bk)/SP;
+const r2=runner(dur2,()=>v2.draw(),$('#p2'),'▶ Yolculuğu başlat');
+const v2=view('#c2c',(g,w,h)=>{const lo=Math.min(0,P.fw-P.bk)-10,hi=P.fw+10,sx=x=>24+(x-lo)/(hi-lo)*(w-48),t=r2.t,p=Math.min(SP*t,P.fw+P.bk),out=Math.min(p,P.fw),back=Math.max(0,p-P.fw),x=out-back,yU=h*.32,yD=h*.6;
+ g.fillStyle='#ece6d6';g.fillRect(0,yU-24,w,yD-yU+48);
+ line(g,sx(0),yU,sx(out),yU,RED,4);if(back)line(g,sx(P.fw),yD,sx(x),yD,RED,4);
+ line(g,sx(0),h*.85,sx(x),h*.85,BLUE,4);text(g,'Δx',sx(x/2||0),h*.93,BLUE,'center');
+ line(g,sx(0),yU-26,sx(0),h*.88,INK,2);text(g,'başlangıç',sx(0),yU-36,INK,'center');
+ car(g,sx(x),back?yD:yU,INK,back?-1:1);
+ $('#r2t').textContent=fmt(t,1)+' s';$('#r2p').textContent=fmt(p)+' m';$('#r2d').textContent=fmt(x)+' m';$('#r2s').textContent=(t?fmt(p/t,1):'0')+' m/s';$('#r2v').textContent=(t?fmt(x/t,1):'0')+' m/s'});
+
+// 3
+let hA=2,hB=7,dragH=null;
+const r3=runner(()=>10,()=>v3.draw(),$('#p3'),'▶ Aracı sür');r3.t=10;
+const b3=w=>({x:(w<520?96:150),y:14,w:w-(w<520?96:150)-14,h:0});
+const v3=view('#c3c',(g,w,h)=>{const b=b3(w);b.h=h-46;const lo=-40,hi=140,{sx,sy}=plot(g,b,0,10,lo,hi,'t (s)','x (m)'),X=t=>P.x0+P.v*t,t=r3.t,rw=w<520?38:64;
+ g.fillStyle='#ded7c6';g.fillRect(8,b.y,rw,b.h);line(g,8+rw/2,b.y,8+rw/2,b.y+b.h,'#fff',2,[10,9]);
+ for(let i=0;i<=Math.floor(t);i++){const y=sy(X(i));if(y>=b.y&&y<=b.y+b.h)line(g,8,y,8+rw,y,RED,2)}
+ g.save();g.beginPath();g.rect(b.x,b.y,b.w,b.h);g.clip();line(g,sx(0),sy(X(0)),sx(10),sy(X(10)),'#14131133',2,[5,6]);line(g,sx(0),sy(X(0)),sx(t),sy(X(t)),RED,3.5);
+ const a=Math.min(hA,hB),c=Math.max(hA,hB);g.fillStyle='#1546c01f';g.beginPath();g.moveTo(sx(a),sy(X(a)));g.lineTo(sx(c),sy(X(a)));g.lineTo(sx(c),sy(X(c)));g.fill();line(g,sx(a),sy(X(a)),sx(c),sy(X(a)),BLUE,2);line(g,sx(c),sy(X(a)),sx(c),sy(X(c)),BLUE,2);
+ text(g,'Δt',(sx(a)+sx(c))/2,sy(X(a))+(P.v>=0?13:-13),BLUE,'center');text(g,'Δx',sx(c)+7,(sy(X(a))+sy(X(c)))/2,BLUE);g.restore();
+ const cy=sy(X(t));if(cy>b.y-4&&cy<b.y+b.h+4){line(g,8+rw,cy,sx(t),cy,INK,1,[3,4]);g.save();g.translate(8+rw/2,cy);g.rotate(P.v>=0?-Math.PI/2:Math.PI/2);car(g,0,0,INK,1,w<520?28:36,14);g.restore()}
+ for(const q of[hA,hB]){g.fillStyle=RED;g.beginPath();g.arc(sx(q),sy(X(q)),8,0,7);g.fill();g.strokeStyle='#fff';g.lineWidth=2;g.stroke()}
+ const dt=c-a;$('#r3x').textContent=fmt(P.v*dt,1)+' m';$('#r3t').textContent=fmt(dt,1)+' s';$('#r3s').textContent=(dt>0?fmt(P.v,1):'—')+' m/s'});
+pointer($('#c3c'),(x,y,k)=>{const c=$('#c3c');if(k==='up'){dragH=null;return}const b=b3(c.clientWidth),tm=Math.max(0,Math.min(10,Math.round((x-b.x)/b.w*20)/2));if(k==='down')dragH=Math.abs(tm-hA)<Math.abs(tm-hB)?'a':'b';if(dragH==='a')hA=tm;else if(dragH)hB=tm;v3.draw()});
+
+// 4
+const vs=[6,6,0,-4,-4],D4=2;let drag4=null;
+const parts=(w,h)=>({top:{x:48,y:12,w:w-62,h:h*.5-30},bot:{x:48,y:h*.5+16,w:w-62,h:h*.5-44}});
+const v4=view('#c4c',(g,w,h)=>{const{top,bot}=parts(w,h),A=plot(g,top,0,10,-10,10,'t (s)','v (m/s)');
+ vs.forEach((v,i)=>{const x1=A.sx(i*D4),x2=A.sx((i+1)*D4),y=A.sy(v),z=A.sy(0);g.fillStyle=v>=0?'#e5341b44':'#1546c044';g.fillRect(x1+1,Math.min(y,z),x2-x1-2,Math.abs(y-z));line(g,x1+4,y,x2-4,y,v>=0?RED:BLUE,5);if(v)text(g,fmt(v*D4)+' m',(x1+x2)/2,v>0?z-11:z+11,INK,'center','700 11px '+MONO);g.fillStyle=INK;g.beginPath();g.arc((x1+x2)/2,y,6,0,7);g.fill()});
+ const xs=[0];vs.forEach(v=>xs.push(xs[xs.length-1]+v*D4));const m=Math.max(40,...xs.map(Math.abs))*1.1,B=plot(g,bot,0,10,-m,m,'t (s)','x (m)');
+ g.strokeStyle=INK;g.lineWidth=3.5;g.beginPath();xs.forEach((x,i)=>i?g.lineTo(B.sx(i*D4),B.sy(x)):g.moveTo(B.sx(0),B.sy(x)));g.stroke();
+ const d=xs[5],p=vs.reduce((s,v)=>s+Math.abs(v)*D4,0);$('#r4d').textContent=fmt(d)+' m';$('#r4p').textContent=fmt(p)+' m';$('#r4v').textContent=fmt(d/10,1)+' m/s';
+ const m4=$('#m4');if(d===0&&p>0){m4.innerHTML='<b>Başardın.</b> Net alan sıfır: pozitif ve negatif alanlar birbirini götürdü. Araç '+fmt(p)+' m yol aldı ama yer değiştirmesi 0, ortalama hızı da 0.'}else m4.textContent='Araç hareket etsin ama 10 saniye sonunda başladığı yere dönsün. (Şu an Δx = '+fmt(d)+' m)'});
+pointer($('#c4c'),(x,y,k)=>{const c=$('#c4c');if(k==='up'){drag4=null;return}const{top}=parts(c.clientWidth,c.clientHeight);if(k==='down'){if(y>top.y+top.h+10)return;drag4=Math.max(0,Math.min(4,Math.floor((x-top.x)/top.w*5)))}if(drag4===null)return;vs[drag4]=Math.max(-10,Math.min(10,Math.round((top.y+top.h/2-y)/(top.h/20))));v4.draw()});
+
+// 5
+const dur5=()=>Math.min(30,Math.max(8,(meet5()??16)*1.25));
+function meet5(){const r=P.va-P.vb;if(r<=0)return null;return P.d/r}
+const r5=runner(dur5,()=>v5.draw(),$('#p5'),'▶ Oynat');
+const v5=view('#c5c',(g,w,h)=>{const T=dur5(),t=r5.t,XA=s=>P.va*s,XB=s=>P.d+P.vb*s,m=meet5();
+ const vals=[0,P.d,XA(T),XB(T)],lo=Math.min(...vals),hi=Math.max(...vals,10),pd=(hi-lo)*.08,y0=lo-pd,y1=hi+pd;
+ const sxr=x=>22+(x-y0)/(y1-y0)*(w-44);g.fillStyle='#ece6d6';g.fillRect(0,8,w,76);line(g,0,46,w,46,'#fff',2,[12,10]);
+ car(g,sxr(XA(t)),27,RED,P.va<0?-1:1);car(g,sxr(XB(t)),65,BLUE,P.vb<0?-1:1);
+ text(g,'A',sxr(XA(t)),27,'#fff','center','700 11px '+MONO);text(g,'B',sxr(XB(t)),65,'#fff','center','700 11px '+MONO);
+ const b={x:58,y:100,w:w-72,h:h-136};const{sx,sy}=plot(g,b,0,T,y0,y1,'t (s)','x (m)');
+ g.save();g.beginPath();g.rect(b.x,b.y,b.w,b.h);g.clip();
+ line(g,sx(0),sy(XA(0)),sx(T),sy(XA(T)),'#e5341b55',2,[5,6]);line(g,sx(0),sy(XB(0)),sx(T),sy(XB(T)),'#1546c055',2,[5,6]);
+ line(g,sx(0),sy(XA(0)),sx(t),sy(XA(t)),RED,3.5);line(g,sx(0),sy(XB(0)),sx(t),sy(XB(t)),BLUE,3.5);
+ if(m!==null&&m<=T){g.strokeStyle=INK;g.lineWidth=2.5;g.beginPath();g.arc(sx(m),sy(XA(m)),9,0,7);g.stroke()}g.restore();
+ const s=P.vb<0?'− '+fmt(-P.vb):'+ '+fmt(P.vb);
+ $('#alg').innerHTML=`x_A = ${P.va}·t<br>x_B = ${P.d} ${s}·t<br><br>${P.va}·t = ${P.d} ${s}·t<br>`+(m===null?`<span style="color:${RED}">Hız farkı pozitif değil, A hiçbir zaman B'ye yetişemez.</span>`:`t = ${P.d}/${fmt(P.va-P.vb)} = <span style="color:${RED}">${fmt(m,2)} s</span><br>x = <span style="color:${RED}">${fmt(XA(m),1)} m</span>`)});
+
+// 6
+const v6=view('#c6c',(g,w,h)=>{const nar=w<620,V=s=>P.v6+P.a6*s,X=s=>P.v6*s+.5*P.a6*s*s;
+ const b1=nar?{x:46,y:12,w:w-60,h:h/2-36}:{x:46,y:14,w:w/2-66,h:h-48},b2=nar?{x:46,y:h/2+10,w:w-60,h:h/2-36}:{x:w/2+36,y:14,w:w/2-50,h:h-48};
+ const vm=Math.max(10,Math.abs(V(0)),Math.abs(V(10)))*1.1,A=plot(g,b1,0,10,-vm,vm,'t (s)','v (m/s)');
+ g.fillStyle='#e5341b33';g.beginPath();g.moveTo(A.sx(0),A.sy(0));for(let i=0;i<=40;i++)g.lineTo(A.sx(i/4),A.sy(V(i/4)));g.lineTo(A.sx(10),A.sy(0));g.fill();line(g,A.sx(0),A.sy(V(0)),A.sx(10),A.sy(V(10)),RED,3.5);
+ let m=30;for(let i=0;i<=40;i++)m=Math.max(m,Math.abs(X(i/4)));m*=1.1;const B=plot(g,b2,0,10,-m,m,'t (s)','x (m)');g.strokeStyle=INK;g.lineWidth=3.5;g.beginPath();for(let i=0;i<=40;i++){i?g.lineTo(B.sx(i/4),B.sy(X(i/4))):g.moveTo(B.sx(0),B.sy(0))}g.stroke();
+ $('#r6v').textContent=fmt(V(10),1)+' m/s';$('#r6x').textContent=fmt(X(10),1)+' m'});
+
+// 7 oyun
+const LV=[{p:[[0,10],[12,90]],h:'Sabit hız: çizgi hiç kırılmıyor, aracın hızını değiştirme.'},{p:[[0,15],[3,50],[6,50],[9,85],[12,85]],h:'Yatay kısımlarda tam durmalısın. Yatay çizgi hız sıfır demek.'},{p:[[0,10],[4,85],[6,85],[12,20]],h:'Çizgi indiğinde hız negatif: aracı geri sürmelisin.'}];
+const G={l:0,t:-1,x:50,tr:[],phase:'idle',cd:0,last:0};
+const tgt=t=>{const p=LV[G.l].p;for(let i=1;i<p.length;i++)if(t<=p[i][0]){const[a,b]=p[i-1],[c,d]=p[i];return b+(d-b)*(t-a)/(c-a)}return p[p.length-1][1]};
+const gBox=w=>{const r=w<520?46:84;return{r,b:{x:r+44,y:14,w:w-r-58,h:0}}};
+const vg=view('#gc',(g,w,h)=>{const{r,b}=gBox(w);b.h=h-46;const{sx,sy}=plot(g,b,0,12,0,100,'t (s)','x (m)');
+ g.fillStyle='#ded7c6';g.fillRect(6,b.y,r,b.h);line(g,6+r/2,b.y,6+r/2,b.y+b.h,'#fff',2,[10,9]);
+ g.strokeStyle='#14131118';g.lineWidth=(b.h/100)*12;g.lineJoin='round';g.beginPath();LV[G.l].p.forEach(([a,c],i)=>i?g.lineTo(sx(a),sy(c)):g.moveTo(sx(a),sy(c)));g.stroke();
+ g.strokeStyle=INK;g.lineWidth=2;g.setLineDash([7,6]);g.beginPath();LV[G.l].p.forEach(([a,c],i)=>i?g.lineTo(sx(a),sy(c)):g.moveTo(sx(a),sy(c)));g.stroke();g.setLineDash([]);
+ g.strokeStyle=RED;g.lineWidth=3.5;g.beginPath();G.tr.forEach(([a,c],i)=>i?g.lineTo(sx(a),sy(c)):g.moveTo(sx(a),sy(c)));g.stroke();
+ const t=Math.max(0,G.t);line(g,sx(t),b.y,sx(t),b.y+b.h,'#14131155',1);
+ const cy=sy(G.x);line(g,6+r,cy,sx(t),cy,RED,1,[3,4]);g.save();g.translate(6+r/2,cy);g.rotate(-Math.PI/2);car(g,0,0,RED,1,30,14);g.restore();
+ g.fillStyle=RED;g.beginPath();g.arc(sx(t),cy,6,0,7);g.fill();
+ if(G.phase==='cd')text(g,String(Math.ceil(G.cd)),b.x+b.w/2,b.y+b.h/2,RED,'center','90px "Instrument Serif",serif')});
+function gLoop(n){if(G.phase==='idle')return;const d=Math.min(.05,(n-G.last)/1000);G.last=n;
+ if(G.phase==='cd'){G.cd-=d;if(G.cd<=0){G.phase='go';G.t=0;G.tr=[]}}
+ else{G.t+=d;G.tr.push([G.t,G.x]);if(G.t>=12){G.phase='idle';const ok=G.tr.filter(([a,c])=>Math.abs(c-tgt(a))<=6).length/G.tr.length*100;$('#gMsg').textContent=`İsabet: %${fmt(ok)}. `+(ok>=90?'Harika, grafiği elinle okudun!':ok>=65?'İyi! '+LV[G.l].h:'Bir daha dene. '+LV[G.l].h);G.t=12}}
+ vg.draw();if(G.phase!=='idle')requestAnimationFrame(gLoop)}
+$$('[data-l]').forEach(b=>b.onclick=()=>{G.l=+b.dataset.l;G.x=tgt(0);G.tr=[];G.t=0;G.phase='cd';G.cd=3;G.last=performance.now();$('#gMsg').textContent=LV[G.l].h;$('#gc').focus({preventScroll:true});requestAnimationFrame(gLoop)});
+pointer($('#gc'),(x,y,k)=>{if(k==='up')return;const c=$('#gc'),{b}=gBox(c.clientWidth);b.h=c.clientHeight-46;G.x=Math.max(0,Math.min(100,(b.y+b.h-y)/b.h*100));if(G.phase==='idle')vg.draw()});
+$('#gc').addEventListener('keydown',e=>{if(e.key==='ArrowUp'||e.key==='ArrowDown'){e.preventDefault();G.x=Math.max(0,Math.min(100,G.x+(e.key==='ArrowUp'?2.5:-2.5)));if(G.phase==='idle')vg.draw()}});
+
+// test
+const Q=[
+['İki aracın x-t çizgileri bir noktada kesişiyor. Bu an için hangisi kesin doğrudur?',['Hızları eşittir','Konumları eşittir','İkisi de durur','İvmeleri eşittir'],1,'Kesişim aynı t için aynı x demektir. Hızları eşit olsaydı çizgiler paralel olurdu.'],
+['x-t grafiğinde daha dik çizgi neyi gösterir?',['Daha uzun yolu','Yokuş yukarı gidişi','Daha büyük hızı','Daha büyük ivmeyi'],2,'Eğim Δx/Δt, yani hızdır. Çizginin dikliğinin yolun eğimiyle ilgisi yoktur.'],
+['x-t grafiğinde yatay bir çizgi ne anlatır?',['Araç sabit hızla gidiyor','Araç duruyor','Araç düz yolda gidiyor','İvme çok büyük'],1,'Zaman geçiyor ama x değişmiyor: Δx = 0, v = 0.'],
+["72 km/h sabit hızla giden araç 10 saniyede kaç metre yol alır?",['72 m','720 m','200 m','20 m'],2,'72 km/h = 20 m/s (3,6\'ya böl). 20·10 = 200 m.'],
+['v-t grafiği 4 s boyunca +5 m/s, sonra 2 s boyunca −5 m/s. Net yer değiştirme kaçtır?',['30 m','10 m','0 m','20 m'],1,'Alanlar: +20 m ve −10 m. Toplam yol 30 m, Δx ise 10 m.'],
+['Aynı yönde 20 m/s ve 12 m/s giden araçların arası 60 m. Arkadaki kaç saniyede yetişir?',['3 s','1,9 s','5 s','7,5 s'],3,'Aradaki mesafe, hız farkıyla kapanır: 60/(20−12) = 7,5 s.']];
+let qR=0,qD=0;$('#quiz').innerHTML=Q.map(([q,o],i)=>`<div class="q" data-i="${i}"><h3>${q}</h3><div class="o">${o.map(x=>`<button>${x}</button>`).join('')}</div></div>`).join('');
+$$('.q').forEach(c=>{const[, ,r,w]=Q[+c.dataset.i],bs=[...c.querySelectorAll('button')];bs.forEach((b,j)=>b.onclick=()=>{bs.forEach(x=>x.disabled=true);bs[r].classList.add('yes');if(j!==r)b.classList.add('no');else qR++;qD++;const p=document.createElement('p');p.className='why';p.textContent=w;c.append(p);$('#qs').textContent=`Doğru: ${qR} / ${qD}`})});
+
+new ResizeObserver(drawAll).observe(document.body);
+drawAll();if(document.fonts)document.fonts.ready.then(drawAll);
+</script>
+<script>window.X_DATA={hints:{"o": "Sıfır noktasını sağa sola taşır; araç ve bayrak yerinde kalır.", "fw": "Aracın önce ileri gittiği mesafe.", "bk": "Aracın sonra geri döndüğü mesafe.", "x0": "Aracın harekete başladığı nokta.", "v": "Eksi değer aracı geriye sürer; çizgi aşağı iner.", "d": "A ile B'nin başlangıçtaki uzaklığı.", "va": "A aracının sağa doğru hızı.", "vb": "Eksi: B sola, A'ya doğru gelir. Artı: B de sağa gider.", "v6": "Aracın t = 0 anındaki hızı.", "a6": "Her saniye hızın ne kadar değiştiği. 0 yapınca düzgün doğrusal hareket olur."},gens:(R,C,n)=>[
+ ()=>{const a=R(1,9)*5,v=R(2,12),t=R(2,9);return{q:`Konum denklemi x = ${a} + ${v}·t (SI). t = ${t} s anında konum kaç metredir?`,a:a+v*t,u:'m',s:[`x = ${a} + ${v}·${t}`,`x = ${a+v*t} m`]}},
+ ()=>{const k=C([36,54,72,90,108]),t=R(2,20);return{q:`${k} km/h sabit hızla giden araç ${t} saniyede kaç metre yol alır?`,a:k/3.6*t,u:'m',s:[`${k} km/h ÷ 3,6 = ${n(k/3.6)} m/s`,`x = ${n(k/3.6)}·${t} = ${n(k/3.6*t)} m`]}},
+ ()=>{const a=R(6,20)*10,b=R(1,5)*10,T=C([10,20,25,40,50]);return{q:`Araç ${a} m ileri, sonra ${b} m geri gidiyor. Toplam süre ${T} s. Ortalama hızı kaç m/s?`,a:(a-b)/T,u:'m/s',s:[`Δx = ${a} − ${b} = ${a-b} m`,`v̄ = ${a-b}/${T} = ${n((a-b)/T)} m/s`]}},
+ ()=>{const a=R(6,20)*10,b=R(1,5)*10,T=C([10,20,25,40,50]);return{q:`Araç ${a} m ileri, sonra ${b} m geri gidiyor. Toplam süre ${T} s. Ortalama sürati kaç m/s?`,a:(a+b)/T,u:'m/s',s:[`Toplam yol = ${a} + ${b} = ${a+b} m`,`sürat = ${a+b}/${T} = ${n((a+b)/T)} m/s`]}},
+ ()=>{const v=R(5,20),w=R(5,20),t=R(3,12),d=(v+w)*t;return{q:`Aralarında ${d} m olan araçlar ${v} m/s ve ${w} m/s ile birbirine doğru gidiyor. Kaç saniyede karşılaşırlar?`,a:t,u:'s',s:[`Yaklaşma hızı = ${v} + ${w} = ${v+w} m/s`,`t = ${d}/${v+w} = ${t} s`]}},
+ ()=>{const w=R(5,15),f=w+R(2,10),t=R(3,15),d=(f-w)*t;return{q:`Aynı yönde giden araçların hızları ${f} m/s ve ${w} m/s. Hızlı olan ${d} m geride. Kaç saniyede yetişir?`,a:t,u:'s',s:[`Hız farkı = ${f} − ${w} = ${f-w} m/s`,`t = ${d}/${f-w} = ${t} s`]}},
+ ()=>{const a=R(2,9),t=R(2,8),b=R(1,9),u=R(1,5);return{q:`v-t grafiği: ${t} s boyunca +${a} m/s, sonra ${u} s boyunca −${b} m/s. Net yer değiştirme kaç metredir?`,a:a*t-b*u,u:'m',s:[`Pozitif alan = ${a}·${t} = ${a*t} m`,`Negatif alan = ${b}·${u} = ${b*u} m`,`Δx = ${a*t} − ${b*u} = ${a*t-b*u} m`]}},
+ ()=>{const a=C([1,2,3,4,5]),t=R(2,10);return{q:`Duran bir cisim ${a} m/s² sabit ivmeyle harekete başlıyor. ${t} s sonunda kaç metre gitmiştir?`,a:.5*a*t*t,u:'m',s:[`x = ½·a·t²`,`x = ½·${a}·${t}² = ${n(.5*a*t*t)} m`]}}
+],example:{"q": "Bir tren istasyondan 20 m/s sabit hızla çıkıyor. 5 s sonra ikinci tren aynı noktadan, aynı yönde 30 m/s ile çıkıyor. İkinci tren birinciye ne zaman ve nerede yetişir?", "steps": [["Zamanı birinci trenin çıkışından başlat ve iki konum denklemini yaz. İkinci tren 5 s geç başladığı için onun süresi t − 5 olur.", "x₁ = 20·t &nbsp; x₂ = 30·(t − 5)"], ["Yetişme anında iki tren aynı konumdadır.", "20·t = 30·(t − 5)"], ["Denklemi çöz.", "20t = 30t − 150 → 10t = 150 → t = 15 s"], ["Konumu bulmak için t değerini denklemlerden birine koy.", "x = 20·15 = 300 m"], ["İkinci denklemle sağlama yap. Aynı sonuç çıkmalıdır.", "x₂ = 30·(15 − 5) = 300 m ✓"]]},cards:[["Konum", "Bir cismin seçilen sıfır noktasına göre yeri. Sıfır değişirse değeri de değişir."], ["Yer değiştirme", "Son konum eksi ilk konum: Δx = x₂ − x₁. Negatif olabilir, ara yol önemli değildir."], ["Yol", "Gidilen toplam uzunluk. Hep artar, yönü yoktur."], ["Hız", "Birim zamandaki yer değiştirme: v = Δx/Δt. Yönü vardır."], ["Sürat", "Birim zamanda alınan yol. Yönü yoktur."], ["Düzgün doğrusal hareket", "Hızın büyüklüğü ve yönü sabittir, ivme sıfırdır."], ["x-t grafiğinin eğimi", "Hızı verir. Yatay çizgi cismin durduğunu gösterir."], ["v-t grafiğinin alanı", "Yer değiştirmeyi verir. Eksen altındaki alan negatif sayılır."], ["İvme", "Hızın zamana göre değişimi: a = Δv/Δt. v-t grafiğinin eğimidir."], ["Birim çevirme", "km/h'yi m/s yapmak için 3,6'ya böl. m/s'yi km/h yapmak için 3,6 ile çarp."]]};
+(function(){
+const D=window.X_DATA,$a=s=>[...document.querySelectorAll(s)],q=s=>document.querySelector(s);
+const nf=(x,st)=>{const d=st>=1?0:st>=.1&&Math.abs(st*10-Math.round(st*10))<1e-9?1:2;return x.toFixed(d).replace('.',',').replace('-','−')};
+function fill(i){const mn=+i.min,mx=+i.max,p=x=>(x-mn)/(mx-mn)*100,v=+i.value,o=mn<0&&mx>0?0:mn,a=Math.min(p(o),p(v)),b=Math.max(p(o),p(v));i.style.setProperty('--a',a+'%');i.style.setProperty('--b',b+'%')}
+window.refreshSliders=()=>$a('input.sl').forEach(fill);
+$a('[data-s]').forEach(e=>{const[id,,mn,mx,st,,u]=e.dataset.s.split('|'),i=e.querySelector('input');if(!i)return;i.classList.add('sl');
+ const row=document.createElement('div');row.className='slrow';const mk=(t,s,l)=>{const b=document.createElement('button');b.type='button';b.textContent=t;b.setAttribute('aria-label',l);let tm;const go=()=>{const nv=Math.max(+mn,Math.min(+mx,+i.value+s*(+st)));i.value=nv;i.dispatchEvent(new Event('input',{bubbles:true}))};
+  b.addEventListener('click',ev=>{if(ev.detail===0)go()});b.addEventListener('pointerdown',ev=>{ev.preventDefault();go();tm=setTimeout(function r(){go();tm=setTimeout(r,70)},380)});['pointerup','pointerleave','pointercancel'].forEach(n=>b.addEventListener(n,()=>clearTimeout(tm)));return b};
+ i.replaceWith(row);row.append(mk('−',-1,'Azalt'),i,mk('+',1,'Artır'));
+ const sc=document.createElement('div');sc.className='slscale';sc.innerHTML=`<span class="mn">${nf(+mn,+st)}${u?' '+u:''}</span>${+mn<0&&+mx>0?`<span class="zr" style="left:${-mn/(mx-mn)*100}%">0</span>`:''}<span class="mx">${nf(+mx,+st)}${u?' '+u:''}</span>`;row.after(sc);
+ const h=D.hints[id];if(h){const p=document.createElement('p');p.className='slhint';p.textContent=h;sc.after(p)}
+ i.addEventListener('input',()=>fill(i));fill(i)});
+$a('.ctl').forEach(c=>{const d=document.createElement('div');d.className='slcap';d.textContent='Ayarlar: çubuğu sürükle ya da − / + düğmesine bas. Sonuç anında değişir.';c.prepend(d)});
+
+// soru makinesi
+const R=(a,b)=>a+Math.floor(Math.random()*(b-a+1)),C=a=>a[R(0,a.length-1)],n=x=>String(Math.round(x*100)/100).replace('.',',').replace('-','−');
+const gens=D.gens(R,C,n);let cur,seen=0,good=0,run=0,answered=false,lastG=-1;
+function next(){let k;do{k=R(0,gens.length-1)}while(k===lastG&&gens.length>1);lastG=k;cur=gens[k]();answered=false;q('#xmq').textContent=cur.q;q('#xmu').textContent=cur.u||'';const i=q('#xmi');i.value='';q('#xmr').textContent='';q('#xmr').className='xres';q('#xms').innerHTML='';q('#xmc').textContent='Kontrol et'}
+function stat(){q('#xm1').textContent=good+' / '+seen;q('#xm2').textContent=run}
+function show(){q('#xms').innerHTML=cur.s.map(x=>`<li>${x}</li>`).join('')}
+q('#xmc').onclick=()=>{if(answered)return next();const v=parseFloat(q('#xmi').value.replace(',','.').replace('−','-')),r=q('#xmr');if(isNaN(v)){r.textContent='Önce sayısal bir cevap yaz.';r.className='xres bad';return}
+ const ok=Math.abs(v-cur.a)<=Math.max(cur.t||0,Math.abs(cur.a)*.01,.011);seen++;answered=true;if(ok){good++;run++;r.textContent='Doğru!';r.className='xres ok'}else{run=0;r.textContent='Doğru cevap: '+n(cur.a)+(cur.u?' '+cur.u:'');r.className='xres bad'}show();stat();q('#xmc').textContent='Yeni soru →'};
+q('#xmn').onclick=()=>{if(answered)next();else{show();q('#xmr').textContent='Doğru cevap: '+n(cur.a)+(cur.u?' '+cur.u:'');q('#xmr').className='xres';answered=true;q('#xmc').textContent='Yeni soru →'}};
+q('#xmi').addEventListener('keydown',e=>{if(e.key==='Enter')q('#xmc').click()});
+next();stat();
+
+// çözümlü örnek
+const ex=D.example;q('#xeq').textContent=ex.q;let si=0;const ol=q('#xel'),nb=q('#xen');
+function step(){if(si>=ex.steps.length){si=0;ol.innerHTML='';nb.textContent='İlk adımı göster';return}const[t,c]=ex.steps[si++],li=document.createElement('li');li.innerHTML=`<i>${si}.</i><div>${t}<code>${c}</code></div>`;ol.append(li);nb.textContent=si>=ex.steps.length?'Baştan başla':'Sonraki adım →'}
+nb.onclick=step;nb.textContent='İlk adımı göster';
+
+// kartlar
+q('#xcs').innerHTML=D.cards.map(([a,b])=>`<button class="xc" type="button" aria-label="${a}: kartı çevir"><span class="xci"><span class="xf"><b>${a}</b><small>Çevirmek için dokun</small></span><span class="xf bk"><span>${b}</span><small>${a}</small></span></span></button>`).join('');
+$a('.xc').forEach(c=>c.onclick=()=>c.classList.toggle('fl'));
+if(typeof drawAll==='function'){drawAll();requestAnimationFrame(drawAll)}
+})();
+</script>
+</body>
+</html>

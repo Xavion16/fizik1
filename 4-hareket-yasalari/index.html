@@ -1,0 +1,396 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Kuvvet Ne Yapar?</title>
+<meta name="description" content="Newton'un hareket yasalarını yaygın yanılgılar üzerinden öğreten etkileşimli ders: serbest cisim diyagramı, eğik düzlem, Atwood makinesi.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23f2b705'/%3E%3Crect x='5' y='13' width='14' height='14' fill='%23111'/%3E%3Cpath d='M19 12h7v-4l5 6-5 6v-4h-7z' fill='%23d6281e'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Archivo:wght@400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f0e7d3;--ink:#111;--r:#d6281e;--b:#1c3fa8;--y:#f2b705;--card:#fbf6ea;--soft:#5d574a;--mono:"JetBrains Mono",Consolas,monospace;--bd:3px solid var(--ink)}
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 17px/1.55 Archivo,system-ui,sans-serif;overflow-x:hidden}
+canvas{display:block;width:100%;touch-action:pan-y}
+.w{max-width:1280px;margin:auto;padding:0 24px}
+.hero{height:96vh;min-height:600px;position:relative;border-bottom:var(--bd);overflow:hidden;background:var(--y)}
+.hero canvas{position:absolute;inset:0;height:100%;cursor:ew-resize;touch-action:none}
+.heroT{position:absolute;inset:0;pointer-events:none;display:flex;flex-direction:column;justify-content:space-between;padding:22px 0 44px}
+.heroT a{pointer-events:auto}.heroT .w{margin:0 auto;width:100%}
+.top{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font:700 12px var(--mono)}
+h1{font:400 clamp(58px,13vw,195px)/.84 "Archivo Black",sans-serif;letter-spacing:-.04em;margin:18px 0 0;text-transform:uppercase}
+.hint{font-weight:600;font-size:clamp(18px,1.9vw,23px);line-height:1.3;max-width:27em;margin:0 0 14px}
+nav{display:flex;flex-wrap:wrap;gap:6px}nav a{background:var(--ink);color:var(--bg);text-decoration:none;font:700 12px var(--mono);padding:6px 10px}nav a:hover{background:var(--r)}
+.ch{padding-top:64px}
+.block{display:grid;grid-template-columns:minmax(0,4fr) minmax(0,8fr);border:var(--bd);background:var(--card);box-shadow:10px 10px 0 var(--ink)}
+.side{padding:24px;border-right:var(--bd);min-width:0}
+.bar{padding:16px 24px;border-bottom:var(--bd);grid-column:1/-1;display:flex;align-items:baseline;gap:18px;flex-wrap:wrap}
+.bar.r{background:var(--r);color:#fff}.bar.b{background:var(--b);color:#fff}.bar.y{background:var(--y)}.bar.k{background:var(--ink);color:var(--bg)}
+.bar span{font:400 clamp(44px,5.6vw,76px)/1 "Archivo Black"}
+h2{font:400 clamp(26px,3.2vw,44px)/1.03 "Archivo Black";margin:0;letter-spacing:-.02em;flex:1 1 300px}
+.side p{margin:0 0 13px}
+.eq{font:700 17px/1.65 var(--mono);margin:12px 0;overflow-wrap:anywhere}
+.trap{background:var(--ink);color:var(--bg);padding:12px 14px;margin:14px 0;font-size:16px}.trap b{color:var(--y)}
+.main{min-width:0}
+.main canvas{background:#fbf6ea;border-bottom:var(--bd)}
+.ctl{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:11px 20px;padding:14px 18px}
+.f label{display:flex;justify-content:space-between;font:400 12px var(--mono)}.f output{font-weight:700}
+input[type=range]{width:100%;accent-color:var(--r);margin:6px 0 0}
+.btns{display:flex;flex-wrap:wrap;gap:8px;padding:0 18px 14px;align-items:center}
+button{font:800 14px Archivo;padding:9px 14px;background:var(--card);color:var(--ink);border:var(--bd);cursor:pointer;box-shadow:3px 3px 0 var(--ink)}
+button:hover{transform:translate(1px,1px);box-shadow:2px 2px 0 var(--ink)}button:active{transform:translate(3px,3px);box-shadow:none}
+button.go{background:var(--r);color:#fff}
+button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid var(--b);outline-offset:3px}
+.read{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));border-top:var(--bd)}
+.read div{padding:9px 16px;font:400 12px var(--mono);border-right:1px solid var(--ink)}.read b{display:block;font:700 18px var(--mono)}
+.guess{border-bottom:var(--bd);padding:18px;background:#fff}
+.guess h3{font:700 12px var(--mono);color:var(--r);margin:0 0 6px}.guess p{font:800 20px/1.25 Archivo;margin:0 0 12px}
+.o{display:flex;flex-wrap:wrap;gap:8px}.o button{font-weight:600}
+.yes{background:var(--y)!important;color:#111!important}.no{background:var(--r)!important;color:#fff!important}
+.after{display:none;margin-top:12px;font-weight:400}.guess.done .after{display:block}
+.fbd{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:7px;padding:14px 18px}
+.fbd label{display:flex;gap:8px;align-items:center;font-weight:600;border:2px solid var(--ink);padding:7px 10px;cursor:pointer;background:#fff}
+.fbd input{accent-color:var(--r);width:17px;height:17px}
+#fbdM,#gMsg{padding:12px 18px;min-height:50px;font-size:16px}
+.badge{display:inline-block;font:700 12px var(--mono);padding:4px 10px;border:2px solid var(--ink);background:var(--y)}
+.steps{font:400 14px/1.75 var(--mono);padding:14px 18px;border-top:var(--bd);overflow-wrap:anywhere}.steps b{color:var(--r)}
+.qs{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr))}
+.q{padding:20px;border-right:1px solid var(--ink);border-bottom:1px solid var(--ink)}.q h3{font:800 18px/1.3 Archivo;margin:0 0 12px}.q .o{display:grid;grid-template-columns:1fr 1fr}.q button{text-align:left;font-weight:600;font-size:13px}.q button:disabled{cursor:default;transform:none;box-shadow:none}.q .why{margin:12px 0 0;color:var(--soft);font-size:15px}
+#me{margin-top:80px;background:var(--b);color:#fff;border-top:var(--bd);padding:70px 0}
+#me .g{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:40px;align-items:center}
+.shape{display:flex;gap:0;align-items:flex-end}.shape i{display:block}.s1{width:28%;aspect-ratio:1;background:var(--r);border:var(--bd)}.s2{width:36%;aspect-ratio:1;background:var(--y);border-radius:50%;border:var(--bd);margin-left:-5%}.s3{width:0;height:0;border-left:70px solid transparent;border-right:70px solid transparent;border-bottom:120px solid var(--bg);margin-left:-3%}
+.ab{font:400 clamp(44px,6vw,86px)/1 "Archivo Black";margin:0 0 16px}#me small{display:block;font:400 12px var(--mono);margin-top:18px;color:#cdd6ff}
+@media(max-width:860px){.block{grid-template-columns:minmax(0,1fr);box-shadow:5px 5px 0 var(--ink)}.side{border-right:0;border-bottom:var(--bd)}#me .g{grid-template-columns:minmax(0,1fr)}.w{padding:0 14px}.qs{grid-template-columns:minmax(0,1fr)}.q .o{grid-template-columns:minmax(0,1fr)}.s3{border-left-width:45px;border-right-width:45px;border-bottom-width:80px}}
+</style>
+
+<style id="x-style">
+.ctl{grid-template-columns:repeat(auto-fit,minmax(215px,1fr))!important}
+.slcap{grid-column:1/-1;font:600 13px/1.35 var(--x-body);color:var(--x-soft);display:flex;gap:8px;align-items:center}
+.slcap::before{content:"";width:10px;height:10px;background:var(--x-accent);border-radius:var(--x-dot);flex:none}
+.ctl .f label{font:700 14px/1.25 var(--x-body);color:inherit;align-items:baseline;margin-bottom:6px}
+.ctl .f label output{font:700 18px var(--mono);white-space:nowrap;color:inherit}
+.slrow{display:flex;align-items:center;gap:7px}
+.slrow button{flex:none;width:36px;height:36px;padding:0;font:700 20px/1 var(--mono);border-radius:var(--x-r);box-shadow:none!important;transform:none!important;touch-action:manipulation;user-select:none}
+input[type=range].sl{-webkit-appearance:none;appearance:none;flex:1;min-width:0;height:36px;margin:0;background:transparent;cursor:ew-resize;touch-action:none}
+.sl::-webkit-slider-runnable-track{height:12px;border-radius:var(--x-r);border:var(--x-track-bd);background:linear-gradient(to right,var(--x-rest) var(--a),var(--x-accent) var(--a),var(--x-accent) var(--b),var(--x-rest) var(--b))}
+.sl::-moz-range-track{height:12px;border-radius:var(--x-r);border:var(--x-track-bd);background:linear-gradient(to right,var(--x-rest) var(--a),var(--x-accent) var(--a),var(--x-accent) var(--b),var(--x-rest) var(--b))}
+.sl::-webkit-slider-thumb{-webkit-appearance:none;width:26px;height:26px;margin-top:-8px;border-radius:var(--x-dot);background:var(--x-thumb);border:3px solid var(--x-thumb-bd);box-shadow:0 2px 6px #0006;cursor:grab}
+.sl::-moz-range-thumb{width:20px;height:20px;border-radius:var(--x-dot);background:var(--x-thumb);border:3px solid var(--x-thumb-bd);box-shadow:0 2px 6px #0006;cursor:grab}
+.slscale{position:relative;height:16px;margin:0 43px;font:400 11px var(--mono);color:var(--x-soft)}
+.slscale span{position:absolute;top:0;white-space:nowrap}.slscale .mn{left:0}.slscale .mx{right:0}.slscale .zr{transform:translateX(-50%)}
+.slhint{margin:4px 0 0!important;font:400 13px/1.35 var(--x-body)!important;color:var(--x-soft)!important}
+.xs{padding-top:72px;padding-bottom:6px}
+.xs h2{margin-bottom:10px}
+.xlead{max-width:62ch;margin:0 0 18px;color:var(--x-soft)}
+.xbox{background:var(--x-card);color:var(--x-ink);border:var(--x-bd);border-radius:var(--x-rb);padding:22px;box-shadow:var(--x-sh)}
+.xm{display:grid;grid-template-columns:minmax(0,3fr) minmax(0,2fr);gap:26px}
+.xq{font:600 clamp(20px,2.2vw,26px)/1.3 var(--x-body);margin:0 0 16px}
+.xin{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.xin input{width:150px;padding:10px 12px;font:700 18px var(--mono);border:var(--x-bd);border-radius:var(--x-r);background:var(--x-field);color:var(--x-ink)}
+.xin span{font:700 15px var(--mono)}
+.xbox button{cursor:pointer}
+.xres{margin-top:14px;font:700 16px var(--x-body);min-height:24px}.xres.ok{color:var(--x-ok)}.xres.bad{color:var(--x-bad)}
+.xsteps{margin:10px 0 0;padding-left:22px;font:400 15px/1.65 var(--mono);overflow-wrap:anywhere}.xsteps li{margin-bottom:4px}
+.xstat{display:grid;grid-template-columns:1fr 1fr;gap:10px;align-content:start}
+.xstat div{border:var(--x-bd);border-radius:var(--x-r);padding:12px;font:400 12px var(--mono);color:var(--x-soft)}.xstat b{display:block;font:700 30px/1.1 var(--mono);color:var(--x-ink)}
+.xstat p{grid-column:1/-1;margin:4px 0 0;font:400 14px/1.45 var(--x-body);color:var(--x-soft)}
+.xex{font:600 clamp(18px,2vw,23px)/1.35 var(--x-body);margin:0 0 14px}
+.xdo{list-style:none;margin:0 0 14px;padding:0}.xdo li{padding:12px 0;border-top:1px solid var(--x-line);display:grid;grid-template-columns:32px minmax(0,1fr);gap:8px;font-size:16px}
+.xdo li>i{font:700 16px var(--mono);font-style:normal;color:var(--x-accent-t)}.xdo code{display:block;font:700 15px/1.6 var(--mono);margin-top:3px;white-space:normal}
+.xcards{display:grid;grid-template-columns:repeat(auto-fill,minmax(235px,1fr));gap:14px}
+.xc{perspective:900px;height:190px;padding:0!important;background:none!important;border:0!important;box-shadow:none!important;transform:none!important;color:var(--x-ink);text-align:left;font:inherit;cursor:pointer}
+.xci{position:relative;display:block;width:100%;height:100%;transition:transform .45s;transform-style:preserve-3d}
+.xc.fl .xci{transform:rotateY(180deg)}
+.xf{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:space-between;padding:16px;backface-visibility:hidden;-webkit-backface-visibility:hidden;border:var(--x-bd);border-radius:var(--x-rb);background:var(--x-card)}
+.xf b{font:700 21px/1.15 var(--x-body)}.xf small{font:400 11px var(--mono);color:var(--x-soft)}
+.xf.bk{transform:rotateY(180deg);background:var(--x-accent);color:var(--x-accent-ink);font:600 15px/1.4 var(--x-body);border-color:var(--x-accent)}
+.xf.bk small{color:inherit;opacity:.75}
+.xmail{display:inline-block;margin-top:6px;font:700 clamp(15px,1.8vw,20px) var(--mono);color:inherit;overflow-wrap:anywhere}
+@media(prefers-reduced-motion:reduce){.xci{transition:none}}
+@media(max-width:820px){.xm{grid-template-columns:minmax(0,1fr)}.xbox{padding:16px}.xcards{grid-template-columns:repeat(auto-fill,minmax(160px,1fr))}.xc{height:220px}.xf b{font-size:18px}.xf.bk{font-size:14px}}
+</style>
+<style>:root{--x-body:Archivo,system-ui,sans-serif;--x-card:#fbf6ea;--x-ink:#111;--x-soft:#5d574a;--x-line:#111;--x-accent:#d6281e;--x-accent-t:#d6281e;--x-accent-ink:#fff;--x-rest:#fff;--x-thumb:#f2b705;--x-thumb-bd:#111;--x-track-bd:2px solid #111;--x-r:0;--x-rb:0;--x-dot:0;--x-bd:3px solid #111;--x-sh:8px 8px 0 #111;--x-field:#fff;--x-ok:#1d7a3e;--x-bad:#d6281e}</style>
+<style>.xlinks{margin:18px 0 0;display:flex;flex-wrap:wrap;gap:6px 16px;font:700 14px var(--mono)}.xlinks a{color:inherit;text-underline-offset:3px}.xlinks span{width:100%;font-weight:400}</style>
+</head>
+<body>
+<section class="hero"><canvas id="hero" role="img" aria-label="İmlecin ittiği blok"></canvas>
+ <div class="heroT"><div class="w"><div class="top"><span>FİZİK 1 · DERS 04</span><span>NEWTON'UN HAREKET YASALARI</span></div><h1>Kuvvet<br>ne yapar?</h1></div>
+ <div class="w"><p class="hint">Çoğu insan “hareket etmesi için kuvvet gerekir” sanır. Newton'un dediği bu değil. Kuvvet hareketi değil, <u>hareketin değişimini</u> yaratır. Bloğu imlecinle ya da parmağınla çek, kuvvet kesilince ne yaptığına bak.</p>
+ <nav aria-label="Bölümler"><a href="#c1">1. Yasa</a><a href="#c2">2. Yasa</a><a href="#c3">Kuvvet diyagramı</a><a href="#c4">Eğik düzlem</a><a href="#c5">Atwood</a><a href="#c6">3. Yasa</a><a href="#c7">Oyun</a><a href="#c8">Test</a><a href="#xm">Soru makinesi</a><a href="#xe">Çözümlü örnek</a><a href="#xk">Bilgi kartları</a><a href="#me">Hakkımda</a></nav></div></div>
+</section>
+
+<section class="ch w" id="c1"><div class="block">
+ <div class="bar r"><span>1</span><h2>Durdurulmayan, durmaz</h2></div>
+ <div class="side"><p>Bir cisme etki eden <b>net kuvvet sıfırsa</b> cisim ya durur ya da sabit hızla düz gitmeye devam eder. Hareketi sürdürmek için kuvvet gerekmez.</p><div class="eq">ΣF = 0 ⟺ v = sabit</div><p>Peki günlük hayatta her şey neden duruyor? Çünkü görünmeyen bir kuvvet var: sürtünme. μ'yü sıfıra indir ve neyin değiştiğini gör.</p><p>Kutunun duruş mesafesi v²/(2μg). Kütle sadeleşti, yani ağır kutu da hafif kutu da aynı yerde durur.</p>
+  <div class="trap"><b>Yanılgı:</b> “Sabit hızla giden arabaya net bir ileri kuvvet etki ediyor.” Hayır. Motorun itişi sürtünmeye eşitse net kuvvet sıfırdır ve hız bu yüzden sabittir.</div></div>
+ <div class="main"><div class="guess" data-guess><h3>ÖNCE TAHMİN ET</h3><p>Sürtünmesiz bir buz pistinde kutuyu bir kez ittin ve elini çektin. Kutu ne yapar?</p><div class="o"><button>Yavaşlayıp durur</button><button data-ok>Aynı hızla gitmeye devam eder</button><button>Hızlanır</button></div><div class="after">Kuvvet yoksa hız değişmez. Kutunun yavaşlaması için de bir kuvvet gerekir. μ = 0 yap ve dene.</div></div>
+  <canvas id="c1c" style="height:230px" role="img" aria-label="Kayan kutu"></canvas>
+  <div class="ctl"><div class="f" data-s="v1|İlk hız|1|20|1|10|m/s"></div><div class="f" data-s="mu1|Sürtünme μ|0|0.5|0.01|0.15|"></div></div>
+  <div class="btns"><button class="go" id="p1">İt!</button></div>
+  <div class="read"><div>Hız<b id="r1v"></b></div><div>Gidilen<b id="r1d"></b></div><div>Beklenen duruş<b id="r1s"></b></div><div>İvme<b id="r1a"></b></div></div></div>
+</div></section>
+
+<section class="ch w" id="c2"><div class="block">
+ <div class="bar b"><span>2</span><h2>Kuvvet ivme yaratır, kütle direnir</h2></div>
+ <div class="side"><p>Net kuvvet varsa cisim ivmelenir. İvme kuvvetle doğru, kütleyle ters orantılıdır ve <b>net kuvvetle aynı yöndedir</b>.</p><div class="eq">ΣF = m·a<br>1 N = 1 kg·m/s²</div><p>Kütle ile ağırlık aynı şey değildir. Kütle cismin ivmeye direncidir (kg), ağırlık ise kütleye etki eden yerçekimi kuvvetidir (W = mg, N). Ay'da kütlen aynı kalır, ağırlığın azalır.</p><div class="trap"><b>Güzel sonuç:</b> Ağır cisim neden hızlı düşmez? Kütle 2 katına çıkınca yerçekimi kuvveti de 2 kat olur: a = 2mg/2m = g. İkisi birbirini götürür.</div></div>
+ <div class="main"><div class="guess" data-guess><h3>ÖNCE TAHMİN ET</h3><p>İki arabaya aynı kuvvet uygulanıyor. Birinin kütlesi diğerinin iki katı. Ağır araba için ne doğrudur?</p><div class="o"><button>İvmesi aynıdır</button><button data-ok>İvmesi yarıdır</button><button>İvmesi çeyrektir</button></div><div class="after">a = F/m. Kütle iki katına çıkarsa ivme yarıya iner. Aynı sürede alınan yol da yarıya iner, çünkü x = ½at².</div></div>
+  <canvas id="c2c" style="height:230px" role="img" aria-label="Aynı kuvvetle çekilen iki araba"></canvas>
+  <div class="ctl"><div class="f" data-s="F2|Kuvvet F (ikisine de)|5|100|5|40|N"></div><div class="f" data-s="m2a|Kırmızı kütle|1|20|1|4|kg"></div><div class="f" data-s="m2b|Mavi kütle|1|20|1|8|kg"></div></div>
+  <div class="btns"><button class="go" id="p2">Yarışı başlat</button></div>
+  <div class="read"><div>a (kırmızı)<b id="r2a"></b></div><div>a (mavi)<b id="r2b"></b></div><div>t<b id="r2t"></b></div><div>v (kırmızı)<b id="r2v"></b></div><div>v (mavi)<b id="r2w"></b></div></div></div>
+</div></section>
+
+<section class="ch w" id="c3"><div class="block">
+ <div class="bar y"><span>✎</span><h2>Bütün problemlerin ilk adımı: serbest cisim diyagramı</h2></div>
+ <div class="side"><p>Dinamik sorularının çoğu burada kazanılır ya da kaybedilir. Cismi tek başına düşün ve yalnızca ona <b>başka cisimlerin uyguladığı</b> kuvvetleri çiz.</p><p>Her kuvvet için “Bunu kim uyguluyor?” diye sor. Cevap veremiyorsan o kuvvet yoktur.</p><div class="trap"><b>Yanılgı:</b> “Elimden çıkan topu ileri iten kuvvet.” Elin topa değmiyor. Havadaki top üzerinde (hava direnci hariç) yalnızca ağırlık vardır.</div><p class="badge" id="fbdN"></p></div>
+ <div class="main"><canvas id="c3c" style="height:300px" role="img" aria-label="Seçilen kuvvetlerin diyagramı"></canvas>
+  <div class="fbd" id="fbdL"></div><div id="fbdM" aria-live="polite"></div>
+  <div class="btns"><button class="go" id="fbdC">Kontrol et</button><button id="fbdX">Sonraki durum →</button></div></div>
+</div></section>
+
+<section class="ch w" id="c4"><div class="block">
+ <div class="bar k"><span>∠</span><h2>Eğik düzlem: eksenleri akıllıca seç</h2></div>
+ <div class="side"><p>x eksenini yüzey boyunca, y eksenini yüzeye dik seç. Böylece ivme tek eksende kalır ve yalnızca ağırlığı bileşenlerine ayırman yeter.</p><div class="eq">W∥ = mg sin θ<br>N = mg cos θ<br>f_s ≤ μ_s·N &nbsp; f_k = μ_k·N</div><div class="trap"><b>Dikkat:</b> N her zaman mg değildir. Eğik düzlemde mg cos θ olur. Bir de statik sürtünme her zaman μ_s·N değildir; bu yalnızca sınır değerdir. Blok dururken sürtünme, tam gerektiği kadardır.</div><p>Kütleyi değiştirip kaymaya başlama açısına bak: tan θ = μ_s koşulunda kütle yoktur.</p></div>
+ <div class="main"><canvas id="c4c" style="height:430px" role="img" aria-label="Eğik düzlem ve kuvvetler"></canvas>
+  <div class="ctl"><div class="f" data-s="m4|Kütle m|1|20|1|5|kg"></div><div class="f" data-s="th4|Açı θ|0|60|1|30|°"></div><div class="f" data-s="us4|μ_s (statik)|0|1|0.05|0.4|"></div><div class="f" data-s="uk4|μ_k (kinetik)|0|1|0.05|0.3|"></div><div class="f" data-s="F4|İtme F (+ yukarı)|-50|150|5|0|N"></div></div>
+  <div class="btns"><button class="go" id="p4">Bırak</button><button id="x4">Ortaya al</button><span class="badge" id="st4"></span></div>
+  <div class="steps" id="eq4"></div></div>
+</div></section>
+
+<section class="ch w" id="c5"><div class="block">
+ <div class="bar r"><span>◯</span><h2>Atwood makinesi: iki cisim, tek ip</h2></div>
+ <div class="side"><p>İp uzamaz, öyleyse iki cismin ivmesi aynı büyüklüktedir. Makara kütlesiz ise gerilme iki yanda aynıdır. Her kütleye ayrı ayrı ΣF = ma yaz, sonra denklemleri topla.</p><div class="eq">m₂g − T = m₂a<br>T − m₁g = m₁a<br>a = (m₂−m₁)g/(m₁+m₂)<br>T = 2m₁m₂g/(m₁+m₂)</div></div>
+ <div class="main"><div class="guess" data-guess><h3>ÖNCE TAHMİN ET</h3><p>Ağır kütle aşağı inerken ipteki gerilme onun ağırlığına göre nasıldır?</p><div class="o"><button>Eşittir</button><button data-ok>Daha küçüktür</button><button>Daha büyüktür</button></div><div class="after">Ağır kütle aşağı ivmelendiğine göre net kuvvet aşağı yönde olmalıdır: m₂g &gt; T. Gerilme ağırlığa eşit olsaydı cisim ivmelenmezdi.</div></div>
+  <canvas id="c5c" style="height:380px" role="img" aria-label="Atwood makinesi"></canvas>
+  <div class="ctl"><div class="f" data-s="m5a|m₁|1|20|1|3|kg"></div><div class="f" data-s="m5b|m₂|1|20|1|5|kg"></div></div>
+  <div class="btns"><button class="go" id="p5">Bırak</button></div>
+  <div class="read"><div>İvme a<b id="r5a"></b></div><div>Gerilme T<b id="r5T"></b></div><div>m₁g<b id="r5w"></b></div><div>m₂g<b id="r5x"></b></div></div></div>
+</div></section>
+
+<section class="ch w" id="c6"><div class="block">
+ <div class="bar b"><span>3</span><h2>Bir kuvvet asla yalnız değildir</h2></div>
+ <div class="side"><p>A cismi B'ye kuvvet uyguluyorsa, B de A'ya <b>aynı büyüklükte ve zıt yönde</b> kuvvet uygular. Hem de aynı anda.</p><div class="eq">F_AB = −F_BA</div><div class="trap"><b>En sık yapılan hata:</b> “Kuvvetler eşit ve zıtsa birbirini götürür, hareket olmaz.” Götürmez, çünkü <b>farklı cisimlere</b> etki ederler. Kitabın ağırlığı ile masanın tepkisi etki-tepki çifti değildir: ikisi de kitaba etkir. Ağırlığın çifti, kitabın Dünya'yı çektiği kuvvettir.</div></div>
+ <div class="main"><div class="guess" data-guess><h3>ÖNCE TAHMİN ET</h3><p>Dev bir kamyon küçük bir arabaya çarpıyor. Çarpışma sırasında kim daha büyük kuvvet uygular?</p><div class="o"><button>Kamyon</button><button>Araba</button><button data-ok>Kuvvetler eşittir</button></div><div class="after">Kuvvetler tam olarak eşittir. Araba daha çok hasar görür, çünkü aynı kuvvet küçük kütleye çok daha büyük ivme verir: a = F/m. Aşağıda kütleleri çok farklı yap ve dene.</div></div>
+  <canvas id="c6c" style="height:250px" role="img" aria-label="Birbirini iten iki patenci"></canvas>
+  <div class="ctl"><div class="f" data-s="m6a|Sol patenci|20|120|5|40|kg"></div><div class="f" data-s="m6b|Sağ patenci|20|120|5|80|kg"></div><div class="f" data-s="F6|İtme kuvveti (0,5 s)|50|500|10|200|N"></div></div>
+  <div class="btns"><button class="go" id="p6">Birbirinizi itin</button></div>
+  <div class="read"><div>a sol<b id="r6a"></b></div><div>a sağ<b id="r6b"></b></div><div>v sol<b id="r6c"></b></div><div>v sağ<b id="r6d"></b></div><div>Toplam momentum<b id="r6p"></b></div></div></div>
+</div></section>
+
+<section class="ch w" id="c7"><div class="block">
+ <div class="bar y"><span>▶</span><h2>Oyun: Kutuyu park et</h2></div>
+ <div class="side"><p>Kutuyu 2 saniye boyunca itersin, sonra sürtünme onu durdurur. Kutu sarı bölgede durmalı. Her hedef için 3 hakkın var.</p><div class="eq">a₁ = (F − μmg)/m<br>v = a₁·2 s<br>d = ½a₁(2 s)² + v²/(2μg)</div><p>Kuvveti kaba bir tahminle seçme, hesapla. İlk denemede tutturmak 3 puan.</p><p class="badge" id="gI"></p></div>
+ <div class="main"><canvas id="gc" style="height:240px" role="img" aria-label="Kutu park oyunu"></canvas>
+  <div id="gMsg" aria-live="polite"></div>
+  <div class="ctl"><div class="f" data-s="gF|İtme kuvveti F|0|300|1|80|N"></div></div>
+  <div class="btns"><button class="go" id="gGo">2 saniye it</button><span class="badge" id="gS"></span></div></div>
+</div></section>
+
+<section class="ch w" id="c8"><div class="block" style="grid-template-columns:minmax(0,1fr)">
+ <div class="bar k" style="border-bottom:0"><span>?</span><h2>Son kontrol</h2><span id="qs" style="font:700 16px var(--mono)"></span></div>
+ <div class="qs" id="quiz" style="border-top:var(--bd)"></div></div></section>
+
+
+<section class="xs w" id="xm"><h2>Soru makinesi</h2><p class="xlead">Sayılar her seferinde değişir, soru hiç bitmez. Kâğıda çöz, cevabını yaz ve çözümü kontrol et. Bu sorularda g = 10 m/s² alın.</p>
+<div class="xbox xm"><div><p class="xq" id="xmq"></p><div class="xin"><input id="xmi" inputmode="decimal" autocomplete="off" aria-label="Cevabın"><span id="xmu"></span><button class="go" id="xmc" type="button">Kontrol et</button><button id="xmn" type="button">Çözümü gör / geç</button></div><div class="xres" id="xmr" aria-live="polite"></div><ol class="xsteps" id="xms"></ol></div>
+<div class="xstat"><div>Doğru<b id="xm1">0 / 0</b></div><div>Seri<b id="xm2">0</b></div><p>Üst üste doğru yapabildiğin kadar devam et. Sınavdan önce 10'luk seri iyi bir hedef.</p></div></div></section>
+<section class="xs w" id="xe"><h2>Çözümlü örnek</h2><p class="xlead">Sınav tipi bir soru. Her adımdan önce durup kendin dene, sonra açıp karşılaştır.</p>
+<div class="xbox"><p class="xex" id="xeq"></p><ol class="xdo" id="xel"></ol><button class="go" id="xen" type="button"></button></div></section>
+<section class="xs w" id="xk"><h2>Bilgi kartları</h2><p class="xlead">Kavramı önce kendin tanımla, sonra kartı çevirip kontrol et.</p><div class="xcards" id="xcs"></div></section>
+<section id="me"><div class="w g"><div class="shape" aria-hidden="true"><i class="s1"></i><i class="s2"></i><i class="s3"></i></div>
+ <div><p class="ab">Hakkımda</p><p>Ben Kadir Kara. Fizik 1 dersinde işlediğimiz her konu için bir etkileşimli çalışma hazırlıyorum; bu site onlardan biri.</p><p>Newton'un yasaları ilk bakışta çok basit görünüyor, ama soruların çoğu sezgilerimize ters düştüğü için kaçıyor. Bu yüzden bu dersi en yaygın yanılgılar etrafında kurdum.</p><p>Diğer projelerim için bana yazabilirsin:<br><a class="xmail" href="mailto:kadirkara1643@gmail.com">kadirkara1643@gmail.com</a></p><nav class="xlinks" aria-label="Diğer dersler"><span>Diğer dersler:</span><a href="../1-bir-boyutta-hareket/">Bir boyutta hareket</a><a href="../2-vektorler/">Vektörler</a><a href="../3-iki-boyutta-hareket/">İki boyutta hareket</a><a href="../">Tüm dersler</a></nav><small>Fizik 1 · Ödev projesi</small></div></div></section>
+
+<script>
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const K='#111',R='#d6281e',B='#1c3fa8',Y='#f2b705',S='#5d574a',MONO='"JetBrains Mono",monospace',D=Math.PI/180,g9=9.81;
+const fmt=(n,d=1)=>{if(Math.abs(n)<.5*10**-d)n=0;return n.toFixed(d).replace('.',',').replace('-','−')};
+const P={},views=[];
+$$('[data-s]').forEach(e=>{const[id,l,mn,mx,st,v,u]=e.dataset.s.split('|');P[id]=+v;const dg=st<.1?2:st<1?2:0;e.innerHTML=`<label for="s_${id}">${l}<output id="o_${id}">${fmt(+v,dg)} ${u}</output></label><input id="s_${id}" type="range" min="${mn}" max="${mx}" step="${st}" value="${v}">`;e.querySelector('input').oninput=ev=>{P[id]=+ev.target.value;$('#o_'+id).textContent=fmt(P[id],dg)+' '+u;document.dispatchEvent(new CustomEvent('chg',{detail:id}));drawAll()}});
+function view(id,fn){const c=$(id),v={c,draw(){const r=c.getBoundingClientRect(),d=devicePixelRatio||1;if(!r.width)return;c.width=r.width*d;c.height=r.height*d;const g=c.getContext('2d');g.setTransform(d,0,0,d,0,0);g.lineCap='butt';g.lineJoin='miter';fn(g,r.width,r.height)}};views.push(v);return v}
+const drawAll=()=>views.forEach(v=>v.draw());
+function arrow(g,x1,y1,x2,y2,c,w=5,lab){const a=Math.atan2(y2-y1,x2-x1),L=Math.hypot(x2-x1,y2-y1);if(L<2)return;const h=Math.min(15,L*.6);g.strokeStyle=g.fillStyle=c;g.lineWidth=w;g.beginPath();g.moveTo(x1,y1);g.lineTo(x2-Math.cos(a)*h*.8,y2-Math.sin(a)*h*.8);g.stroke();g.beginPath();g.moveTo(x2,y2);g.lineTo(x2-h*Math.cos(a-.5),y2-h*Math.sin(a-.5));g.lineTo(x2-h*Math.cos(a+.5),y2-h*Math.sin(a+.5));g.fill();if(lab){g.font='800 13px Archivo,sans-serif';g.textAlign='center';g.textBaseline='middle';const lx=x2+Math.cos(a)*(g.measureText(lab).width/2+9),ly=y2+Math.sin(a)*15;g.fillText(lab,lx,ly)}}
+function txt(g,s,x,y,c=K,al='left',f='12px '+MONO){g.fillStyle=c;g.font=f;g.textAlign=al;g.textBaseline='middle';g.fillText(s,x,y)}
+function box(g,x,y,w,h,c,lab){g.fillStyle=c;g.fillRect(x,y,w,h);g.strokeStyle=K;g.lineWidth=3;g.strokeRect(x,y,w,h);if(lab)txt(g,lab,x+w/2,y+h/2,c===Y||c==='#fff'?K:'#fff','center','800 14px Archivo,sans-serif')}
+function floorLine(g,w,y){g.fillStyle=K;g.fillRect(0,y,w,3);g.strokeStyle=K;g.lineWidth=1.5}
+const sims=[];let lt=performance.now();const sim=o=>{o.on=o.on||false;sims.push(o);return o};
+(function tk(n){const dt=Math.min(.05,(n-lt)/1000);lt=n;sims.forEach(s=>{if(s.on)s.step(dt)});requestAnimationFrame(tk)})(lt);
+$$('[data-guess]').forEach(b=>{const bs=[...b.querySelectorAll('.o button')];bs.forEach(x=>x.onclick=()=>{if(b.classList.contains('done'))return;b.classList.add('done');bs.find(y=>'ok'in y.dataset).classList.add('yes');if(!('ok'in x.dataset))x.classList.add('no');drawAll()})});
+
+// kahraman
+const H={x:.82,v:0,tx:null,sh:0};
+const hv=view('#hero',(g,w,h)=>{const nar=w<700,fy=nar?h*.5:h-22,bs=nar?Math.min(h*.14,96):Math.min(h*.2,120),px=H.x*w;
+ g.fillStyle=K;g.fillRect(0,fy,w,4);for(let x=(-H.sh*w)%50;x<w;x+=50)g.fillRect(x,fy+4,3,10);
+ box(g,px-bs/2,fy-bs,bs,bs,R);txt(g,'m',px,fy-bs/2,'#fff','center','400 '+bs*.5+'px "Archivo Black",sans-serif');
+ if(H.tx!==null){const dx=H.tx*w-px,l=Math.max(-220,Math.min(220,dx));if(Math.abs(l)>bs/2)arrow(g,px+Math.sign(l)*bs/2,fy-bs/2,px+l,fy-bs/2,K,9,'F')}
+ const v=H.v*w*.12;if(Math.abs(H.v)>.01)arrow(g,px,fy-bs-20,px+v,fy-bs-20,B,5,'v');
+});
+const hs=sim({on:true,step(dt){let a=0;if(H.tx!==null)a=(H.tx-H.x)*1.6;H.v+=a*dt;H.x+=H.v*dt;H.sh+=0;if(H.x<.07){H.x=.07;H.v=Math.abs(H.v)*.7}if(H.x>.93){H.x=.93;H.v=-Math.abs(H.v)*.7}H.v*=(1-.08*dt);if(scrollY<innerHeight)hv.draw()}});
+const hc=$('#hero').closest('.hero');hc.addEventListener('pointermove',e=>{const r=hc.getBoundingClientRect();H.tx=(e.clientX-r.left)/r.width});hc.addEventListener('pointerleave',()=>{H.tx=null});hc.addEventListener('pointerdown',e=>{const r=hc.getBoundingClientRect();H.tx=(e.clientX-r.left)/r.width});hc.addEventListener('pointerup',e=>{if(e.pointerType!=='mouse')H.tx=null});
+
+// 1
+const s1=sim({s:0,v:0,step(dt){const a=P.mu1*g9;this.v=Math.max(0,this.v-a*dt);this.s+=this.v*dt;if(this.v<=0)this.on=false;if(P.mu1===0&&this.s>2000)this.on=false;v1.draw()}});s1.v=0;
+const v1=view('#c1c',(g,w,h)=>{const fy=h-52,u=22,cx=w*.35;floorLine(g,w,fy);
+ const off=s1.s*u;for(let m=Math.floor((s1.s-cx/u)/5)*5;m*u-off+cx<w+40;m+=5){const X=cx+m*u-off;g.fillStyle=K;g.fillRect(X,fy+3,2,9);txt(g,fmt(m,0)+' m',X,fy+24,S,'center')}
+ const c=`hsl(${200+P.mu1*0},45%,${90-P.mu1*80}%)`;g.fillStyle=c;g.fillRect(0,fy-6,w,6);
+ box(g,cx-30,fy-60,60,54,Y,'kutu');
+ if(s1.v>0){arrow(g,cx+30,fy-44,cx+30+s1.v*8,fy-44,B,5,'v');if(P.mu1>0)arrow(g,cx-30,fy-16,cx-30-P.mu1*g9*12-8,fy-16,R,5,'f')}
+ if(s1.v>0&&P.mu1===0)txt(g,'Net kuvvet sıfır: hız değişmiyor.',w/2,24,R,'center','800 15px Archivo,sans-serif');else if(s1.s>0&&s1.v===0)txt(g,'Durdu. Onu durduran kuvvet sürtünmeydi.',w/2,24,K,'center','800 15px Archivo,sans-serif');
+ $('#r1v').textContent=fmt(s1.v)+' m/s';$('#r1d').textContent=fmt(s1.s)+' m';$('#r1s').textContent=P.mu1>0?fmt(P.v1*P.v1/(2*P.mu1*g9))+' m':'sonsuz';$('#r1a').textContent=fmt(s1.v>0||!s1.s?-P.mu1*g9:0,2)+' m/s²'});
+$('#p1').onclick=()=>{s1.s=0;s1.v=P.v1;s1.on=true};
+
+// 2
+const s2=sim({t:0,step(dt){this.t+=dt;const a=P.F2/P.m2a,b=P.F2/P.m2b;if(.5*Math.max(a,b)*this.t*this.t>=60)this.on=false;v2.draw()}});
+const v2=view('#c2c',(g,w,h)=>{const a=P.F2/P.m2a,b=P.F2/P.m2b,t=s2.t,X=60,u=(w-X-60)/60,row=(y,c,m,ac)=>{floorLine(g,w,y);const x=.5*ac*t*t,bw=26+m*2.2,bh=20+m*1.3,px=X+Math.min(x,60)*u;box(g,px-bw,y-bh,bw,bh,c,m+'');arrow(g,px,y-bh/2,px+P.F2*.7+6,y-bh/2,K,4,'F')};
+ row(h*.44,R,P.m2a,a);row(h*.86,B,P.m2b,b);for(let m=0;m<=60;m+=10)txt(g,fmt(m,0),X+m*u,h*.86+12,S,'center','10px '+MONO);
+ $('#r2a').textContent=fmt(a,2)+' m/s²';$('#r2b').textContent=fmt(b,2)+' m/s²';$('#r2t').textContent=fmt(t,2)+' s';$('#r2v').textContent=fmt(a*t)+' m/s';$('#r2w').textContent=fmt(b*t)+' m/s'});
+$('#p2').onclick=()=>{s2.t=0;s2.on=true};document.addEventListener('chg',e=>{if(['F2','m2a','m2b'].includes(e.detail)){s2.on=false;s2.t=0}if(['v1','mu1'].includes(e.detail)){}});
+
+// 3 FBD
+const FORCES={W:['Ağırlık (W)',R,0,1],N:['Normal kuvvet (N)',B,0,-1],P:['El ile itme (F)',K,1,0],f:['Sürtünme (f)',Y,-1,0],M:['Hareket kuvveti',S,1,0],T:['İp gerilmesi (T)',B,0,-1]};
+const SC=[
+ {t:'Masada duran kitap',k:'table',ok:['W','N'],m:'Doğru. Yer çeker (W), masa iter (N). İkisi eşit, net kuvvet sıfır.'},
+ {t:'Sabit hızla itilen kutu',k:'push',ok:['W','N','P','f'],m:'Doğru. Hız sabitse net kuvvet sıfırdır: F = f ve N = W. “Hareket kuvveti” diye bir şey yoktur.'},
+ {t:'Elden çıkmış, havada giden top (hava direnci yok)',k:'ball',ok:['W'],m:'Doğru. Yalnızca ağırlık. El artık değmiyor ve ileri giden hız bir kuvvet değildir.'},
+ {t:'Tavana iple asılı duran lamba',k:'lamp',ok:['W','T'],m:'Doğru. İp yukarı çeker, yer aşağı çeker. Bir yüzeye değmediği için N yoktur.'},
+ {t:'Elini çektikten sonra yavaşlayarak kayan kutu',k:'slide',ok:['W','N','f'],m:'Doğru. El yok artık. Yavaşlatan kuvvet sürtünme, ve o harekete zıt yöndedir.'}];
+let si=0;const ch=new Set();
+$('#fbdL').innerHTML=Object.entries(FORCES).map(([k,[n]])=>`<label><input type="checkbox" data-f="${k}">${n}</label>`).join('');
+$$('[data-f]').forEach(i=>i.onchange=()=>{i.checked?ch.add(i.dataset.f):ch.delete(i.dataset.f);v3.draw()});
+const v3=view('#c3c',(g,w,h)=>{const s=SC[si],cx=w/2,cy=h/2+(s.k==='lamp'?20:6),L=75;$('#fbdN').textContent=`Durum ${si+1}/${SC.length}: ${s.t}`;
+ const fy=cy+34;if(['table','push','slide'].includes(s.k)){floorLine(g,w,fy);box(g,cx-34,cy-34,68,68,'#fff')}
+ else if(s.k==='ball'){g.fillStyle='#fff';g.strokeStyle=K;g.lineWidth=3;g.beginPath();g.arc(cx,cy,30,0,7);g.fill();g.stroke();g.setLineDash([4,6]);g.lineWidth=2;g.beginPath();g.arc(cx-140,cy+130,190,-Math.PI*.62,-Math.PI*.15);g.stroke();g.setLineDash([])}
+ else{g.fillStyle=K;g.fillRect(0,0,w,8);g.lineWidth=2;g.beginPath();g.moveTo(cx,8);g.lineTo(cx,cy-26);g.stroke();g.fillStyle=Y;g.strokeStyle=K;g.lineWidth=3;g.beginPath();g.arc(cx,cy,26,0,7);g.fill();g.stroke()}
+ if(s.k==='push')arrow(g,cx-150,cy-52,cx-90,cy-52,'#0003',4,'hareket →'.slice(0,0));
+ ch.forEach(k=>{const[n,c,dx,dy]=FORCES[k],lab=n.match(/\((.*)\)/)?.[1]||'?';let ox=0,oy=0;if(k==='f')oy=26;arrow(g,cx+ox,cy+oy,cx+ox+dx*(L+40),cy+oy+dy*(L+28),c,6,lab)});
+ g.fillStyle=K;g.beginPath();g.arc(cx,cy,5,0,7);g.fill()});
+function fbdLoad(){$$('[data-f]').forEach(i=>{i.checked=false});ch.clear();$('#fbdM').textContent='Bu cisme etkiyen kuvvetleri seç.';v3.draw()}
+$('#fbdC').onclick=()=>{const s=SC[si],okS=new Set(s.ok),miss=s.ok.filter(k=>!ch.has(k)),ext=[...ch].filter(k=>!okS.has(k)),m=$('#fbdM');if(!miss.length&&!ext.length){m.innerHTML='<b>'+s.m+'</b>';return}const names=k=>FORCES[k][0];m.textContent=(ext.length?`Fazla: ${ext.map(names).join(', ')}. Bunu kim uyguluyor? `:'')+(miss.length?`${miss.length} kuvvet eksik. Cisim neye değiyor?`:'')};
+$('#fbdX').onclick=()=>{si=(si+1)%SC.length;fbdLoad()};
+
+// 4 eğik düzlem
+const s4={s:5,v:0,on:false};
+function inc(v){const m=P.m4,a=P.th4*D,W=m*g9,Wp=W*Math.sin(a),N=W*Math.cos(a),Dr=P.F4-Wp;let f=0,ac=0,st='';if(Math.abs(v)<1e-4){if(Math.abs(Dr)<=P.us4*N+1e-9){f=-Dr;ac=0;st='Statik: duruyor'}else{f=-Math.sign(Dr)*P.uk4*N;ac=(Dr+f)/m;st='Kayıyor'}}else{f=-Math.sign(v)*P.uk4*N;ac=(Dr+f)/m;st='Kayıyor'}return{W,Wp,N,Dr,f,ac,st,a}}
+sim(Object.assign(s4,{step(dt){let n=8;dt/=n;while(n--){const q=inc(this.v),nv=this.v+q.ac*dt;if(Math.abs(this.v)>1e-4&&nv*this.v<0)this.v=0;else this.v=nv;this.s+=this.v*dt;if(this.s<=.6||this.s>=9.4){this.s=Math.max(.6,Math.min(9.4,this.s));this.v=0;this.on=false;$('#p4').textContent='Bırak';break}if(Math.abs(this.v)<1e-4&&Math.abs(inc(0).ac)<1e-9){this.v=0}}v4.draw()}}));
+const v4=view('#c4c',(g,w,h)=>{const q=inc(s4.v),a=q.a,x0=Math.max(40,w*.07),y0=h-92,u=Math.min((w-x0-70)/10,(h-190)/(10*Math.sin(60*D))),ux=Math.cos(a),uy=-Math.sin(a),nx=-Math.sin(a),ny=-Math.cos(a),Px=s=>x0+s*u*ux,Py=s=>y0+s*u*uy;
+ g.fillStyle='#e7dcc1';g.strokeStyle=K;g.lineWidth=3;g.beginPath();g.moveTo(x0,y0);g.lineTo(Px(10),Py(10));g.lineTo(Px(10),y0);g.closePath();g.fill();g.stroke();
+ g.fillStyle=K;g.fillRect(0,y0,w,3);if(P.th4>0){g.lineWidth=2;g.beginPath();g.arc(x0,y0,44,-a,0);g.stroke();txt(g,'θ = '+P.th4+'°',x0+52,y0-12)}
+ const bs=32+P.m4*1.5,cx=Px(s4.s)+nx*bs/2,cy=Py(s4.s)+ny*bs/2;g.save();g.translate(cx,cy);g.rotate(-a);box(g,-bs/2,-bs/2,bs,bs,Y);g.restore();
+ const mx=Math.max(q.W,Math.abs(P.F4),1),k=105/mx,ar=(fx,fy,mag,c,lab,o=[0,0])=>{if(mag>.05)arrow(g,cx+o[0],cy+o[1],cx+o[0]+fx*mag*k,cy+o[1]+fy*mag*k,c,5,lab)};
+ g.strokeStyle='#0005';g.setLineDash([4,5]);g.lineWidth=1.5;const ex=cx-ux*q.Wp*k,ey=cy-uy*q.Wp*k;g.beginPath();g.moveTo(cx,cy);g.lineTo(ex,ey);g.moveTo(ex,ey);g.lineTo(cx,cy+q.W*k);g.stroke();g.setLineDash([]);
+ ar(0,1,q.W,R,'mg');ar(nx,ny,q.N,B,'N');const fb=[-nx*bs/2,-ny*bs/2];if(q.f)ar(ux*Math.sign(q.f),uy*Math.sign(q.f),Math.abs(q.f),'#c88a00','f',fb);if(P.F4)ar(ux*Math.sign(P.F4),uy*Math.sign(P.F4),Math.abs(P.F4),K,'F');
+ $('#st4').textContent=q.st+(s4.v?` · v = ${fmt(s4.v,2)} m/s`:'');
+ const fs=P.us4*q.N;$('#eq4').innerHTML=`W∥ = mg sin θ = <b>${fmt(q.Wp)} N</b> · N = mg cos θ = <b>${fmt(q.N)} N</b> · f_s,max = μ_s N = <b>${fmt(fs)} N</b><br>İtici net (sürtünmesiz): F − W∥ = <b>${fmt(q.Dr)} N</b> ${q.st.startsWith('St')?`≤ f_s,max olduğu için blok durur, sürtünme = <b>${fmt(Math.abs(q.f))} N</b>`:`→ kayma var, f_k = μ_k N = <b>${fmt(Math.abs(q.f))} N</b>`}<br>a = ΣF∥ / m = <b>${fmt(q.ac,2)} m/s²</b> ${q.ac>0?'(yukarı)':q.ac<0?'(aşağı)':''}`});
+$('#p4').onclick=()=>{s4.on=!s4.on;$('#p4').textContent=s4.on?'Durdur':'Bırak'};$('#x4').onclick=()=>{s4.on=false;s4.s=5;s4.v=0;$('#p4').textContent='Bırak';v4.draw()};
+
+// 5 atwood
+const a5=()=>({a:(P.m5b-P.m5a)*g9/(P.m5a+P.m5b),T:2*P.m5a*P.m5b*g9/(P.m5a+P.m5b)});
+const s5=sim({s:0,v:0,step(dt){const{a}=a5();this.v+=a*dt;this.s+=this.v*dt;if(Math.abs(this.s)>=2||a===0){this.s=Math.max(-2,Math.min(2,this.s));this.on=false;$('#p5').textContent='Yeniden bırak'}v5.draw()}});
+const v5=view('#c5c',(g,w,h)=>{const cx=w/2,py=46,pr=44,u=Math.min(46,(h-180)/4.3),base=py+70+2*u,lY=base-s5.s*u,rY=base+s5.s*u;const{a,T}=a5();
+ g.fillStyle=K;g.fillRect(cx-60,0,120,8);g.fillRect(cx-3,8,6,py-8);
+ g.lineWidth=2.5;g.strokeStyle=K;g.beginPath();g.moveTo(cx-pr,py);g.lineTo(cx-pr,lY);g.moveTo(cx+pr,py);g.lineTo(cx+pr,rY);g.stroke();g.beginPath();g.arc(cx,py,pr,Math.PI,0);g.stroke();
+ g.fillStyle=Y;g.strokeStyle=K;g.lineWidth=3;g.beginPath();g.arc(cx,py,pr-6,0,7);g.fill();g.stroke();
+ const sz=m=>26+m*1.6,s1_=sz(P.m5a),s2_=sz(P.m5b);box(g,cx-pr-s1_/2,lY,s1_,s1_,R,P.m5a+'');box(g,cx+pr-s2_/2,rY,s2_,s2_,B,P.m5b+'');
+ const k=62/Math.max(P.m5a,P.m5b)/g9;
+ const dir=(xx,yy,sz_,mg,side)=>{arrow(g,xx+side*(sz_/2+16),yy+sz_/2,xx+side*(sz_/2+16),yy+sz_/2+mg*k,R,4,'mg');arrow(g,xx+side*(sz_/2+16),yy+sz_/2,xx+side*(sz_/2+16),yy+sz_/2-T*k,K,4,'T')};
+ dir(cx-pr,lY,s1_,P.m5a*g9,-1);dir(cx+pr,rY,s2_,P.m5b*g9,1);
+ $('#r5a').textContent=fmt(Math.abs(a),2)+' m/s²';$('#r5T').textContent=fmt(T)+' N';$('#r5w').textContent=fmt(P.m5a*g9)+' N';$('#r5x').textContent=fmt(P.m5b*g9)+' N'});
+$('#p5').onclick=()=>{s5.s=0;s5.v=0;s5.on=true;$('#p5').textContent='İniyor…'};document.addEventListener('chg',e=>{if(e.detail==='m5a'||e.detail==='m5b'){s5.on=false;s5.s=0;s5.v=0;$('#p5').textContent='Bırak'}});
+
+// 6 patenci
+const DT=.5;const s6=sim({t:0,step(dt){this.t+=dt;const{x1,x2}=sk(this.t);if(Math.abs(x1)>16||Math.abs(x2)>16||this.t>14)this.on=false;v6.draw()}});
+function sk(t){const a1=P.F6/P.m6a,a2=P.F6/P.m6b,tp=Math.min(t,DT),rest=Math.max(0,t-DT),v1=a1*tp,v2=a2*tp;return{a1,a2,v1,v2,x1:-.35-.5*a1*tp*tp-v1*rest,x2:.35+.5*a2*tp*tp+v2*rest}}
+function person(g,x,fy,m,c,dir,push){const H_=48+m*.55,w_=16+m*.17;g.fillStyle=c;g.strokeStyle=K;g.lineWidth=3;g.fillRect(x-w_/2,fy-H_,w_,H_-10);g.strokeRect(x-w_/2,fy-H_,w_,H_-10);g.beginPath();g.arc(x,fy-H_-11,11,0,7);g.fill();g.stroke();g.fillStyle=K;g.fillRect(x-w_/2-4,fy-8,w_+8,4);g.fillRect(x-w_/2-1,fy-3,4,3);g.fillRect(x+w_/2-3,fy-3,4,3);if(push){g.lineWidth=4;g.beginPath();g.moveTo(x+dir*w_/2,fy-H_*.65);g.lineTo(x+dir*(w_/2+push),fy-H_*.65);g.stroke()}return H_}
+const v6=view('#c6c',(g,w,h)=>{const t=s6.t,q=sk(t),fy=h-34,u=Math.min(w/34,26),sx=x=>w/2+x*u,sc=Math.min(1,w/640);floorLine(g,w,fy);for(let m=-15;m<=15;m+=5){g.fillStyle=K;g.fillRect(sx(m),fy+3,2,8);txt(g,fmt(m,0),sx(m),fy+21,S,'center')}
+ const pushing=t>0&&t<DT||t===0;person(g,sx(q.x1),fy,P.m6a,R,1,pushing?Math.max(4,(q.x2-q.x1)*u/2-14):0);person(g,sx(q.x2),fy,P.m6b,B,-1,pushing?Math.max(4,(q.x2-q.x1)*u/2-14):0);
+ if(t>0&&t<DT){const L=P.F6*.2+8;arrow(g,sx(q.x1)-20,fy-100,sx(q.x1)-20-L,fy-100,K,6,'F');arrow(g,sx(q.x2)+20,fy-100,sx(q.x2)+20+L,fy-100,K,6,'F')}
+ $('#r6a').textContent=fmt(q.a1,2)+' m/s²';$('#r6b').textContent=fmt(q.a2,2)+' m/s²';$('#r6c').textContent=fmt(t?-q.v1:0,2)+' m/s';$('#r6d').textContent=fmt(t?q.v2:0,2)+' m/s';$('#r6p').textContent=fmt(P.m6b*q.v2-P.m6a*q.v1,1)+' kg·m/s'});
+$('#p6').onclick=()=>{s6.t=0;s6.on=true};document.addEventListener('chg',e=>{if(['m6a','m6b','F6'].includes(e.detail)){s6.on=false;s6.t=0}});
+
+// 7 oyun
+const GM={lv:1,pts:0,left:3,x:2,v:0,t:0,run:false,m:10,mu:.3,c:20,w:3,marks:[]};
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+function newT(){GM.m=pick([5,10,20]);GM.mu=pick([.2,.3,.4]);GM.c=12+Math.floor(Math.random()*20);GM.w=Math.max(1.6,3.2-GM.lv*.3);GM.left=3;GM.x=2;GM.v=0;GM.marks=[];GM.run=false;$('#gI').textContent=`m = ${GM.m} kg · μ_k = ${fmt(GM.mu,1)} · μ_s = ${fmt(GM.mu+.1,1)}`;$('#gMsg').textContent=`Hedef merkezi başlangıçtan ${GM.c} m uzakta (kutu ${GM.c} m gitmeli).`;gs();vG.draw()}
+function gs(){$('#gS').textContent=`Hedef ${GM.lv}/5 · Kalan ${GM.left} · Puan ${GM.pts}`}
+const s7=sim({step(dt){const f=GM.mu*GM.m*g9,F=GM.t<2?P.gF:0;GM.t+=dt;let a=(F-f)/GM.m;GM.v=Math.max(0,GM.v+a*dt);GM.x+=GM.v*dt;if(GM.x>=42){GM.x=42;GM.v=0;GM.t=3}if(GM.v<=0&&GM.t>=2){this.on=false;fin()}vG.draw()}});
+function fin(){GM.run=false;const d=GM.x-2,e=d-GM.c;GM.marks.push(GM.x);GM.left--;const inZ=Math.abs(e)<=GM.w/2;
+ if(inZ){const p=GM.left+1;GM.pts+=p;$('#gMsg').textContent=`Mükemmel park! Kutu ${fmt(d)} m gitti. +${p} puan.`;gs();setTimeout(nx,1300);return}
+ const why=d<=.01?`Kutu kımıldamadı: F, μ_s·m·g = ${fmt((GM.mu+.1)*GM.m*g9)} N sınırını aşmalı.`:`Kutu ${fmt(d)} m gitti, ${fmt(Math.abs(e))} m ${e<0?'kısa kaldı':'fazla kaçtı'}.`;
+ $('#gMsg').textContent=GM.left>0?why:why+' Hakkın bitti, sıradaki hedef.';gs();if(GM.left>0)setTimeout(()=>{GM.x=2;GM.v=0;vG.draw()},900);else setTimeout(nx,1700)}
+function nx(){if(GM.lv>=5){$('#gMsg').textContent=`Oyun bitti, puanın ${GM.pts}/15. Yeni oyun için düğmeye bas.`;GM.lv=6;GM.x=2;vG.draw();return}GM.lv++;newT()}
+const vG=view('#gc',(g,w,h)=>{const fy=h-46,u=(w-30)/44,sx=x=>15+x*u;floorLine(g,w,fy);for(let m=0;m<=42;m+=5){g.fillStyle=K;g.fillRect(sx(m+2),fy+3,2,8);txt(g,fmt(m,0),sx(m+2),fy+21,S,'center','10px '+MONO)}
+ g.fillStyle=Y;g.fillRect(sx(2+GM.c-GM.w/2),fy-70,GM.w*u,70);g.strokeStyle=K;g.lineWidth=2;g.strokeRect(sx(2+GM.c-GM.w/2),fy-70,GM.w*u,70);
+ GM.marks.forEach(x=>{g.fillStyle='#d6281e88';g.fillRect(sx(x)-2,fy-14,4,14)});
+ g.fillStyle=K;g.fillRect(sx(43),fy-120,10,120);
+ const bs=Math.max(22,18+GM.m*1.2),X=sx(GM.x);box(g,X-bs/2,fy-bs,bs,bs,R,GM.m+'');
+ if(GM.run&&GM.t<2)arrow(g,X-bs/2-Math.min(80,P.gF*.3+20),fy-bs/2,X-bs/2-2,fy-bs/2,K,6,'');if(GM.run&&GM.v>0)arrow(g,X-bs/2,fy-5,X-bs/2-20,fy-5,'#c88a00',4,'f')});
+$('#gGo').onclick=()=>{if(GM.run||s7.on)return;if(GM.lv>5){GM.lv=1;GM.pts=0;newT();return}if(GM.left<=0)return;GM.x=2;GM.v=0;GM.t=0;if(P.gF<=(GM.mu+.1)*GM.m*g9){fin();vG.draw();return}GM.run=true;s7.on=true};
+newT();
+
+// test
+const Q=[
+['Bir araba otoyolda sabit 100 km/h ile düz gidiyor. Üzerine etki eden net kuvvet nedir?',['İleri doğru','Geri doğru','Sıfır','Hızla orantılı'],2,'Sabit hız, ivme yok demektir. ΣF = ma = 0.'],
+['5 kg kütleye net 20 N uygulanıyor. İvme kaçtır?',['100 m/s²','4 m/s²','0,25 m/s²','15 m/s²'],1,'a = F/m = 20/5 = 4 m/s².'],
+['Kitabın ağırlığı ile masanın kitaba uyguladığı normal kuvvet neden etki-tepki çifti değildir?',['Büyüklükleri farklı','İkisi de kitaba etkir','Aynı anda oluşmazlar','Yönleri aynıdır'],1,'Etki-tepki çifti farklı cisimlere etkir. Bu ikisi aynı cisme etkir ve ikinci yasadan eşittir.'],
+['Asansör yukarı doğru hızlanıyorsa içindeki adamın tartıda gördüğü değer nedir?',['mg\'den büyük','mg\'ye eşit','mg\'den küçük','Sıfır'],0,'N − mg = ma, öyleyse N = m(g + a) > mg.'],
+['10 kg kutu yatay zeminde duruyor (μ_s = 0,5). 20 N ile itiliyor. Sürtünme kaç N olur?',['49 N','20 N','5 N','98 N'],1,'Sınır μ_s N = 49 N. 20 N bunun altında kaldığı için kutu durur ve sürtünme tam 20 N olur.'],
+['Sürtünmesiz 30° eğik düzlemde bloğun ivmesi nedir? (g = 10)',['10 m/s²','8,66 m/s²','5 m/s²','Kütleye bağlı'],2,'a = g sin 30° = 5 m/s². Kütle sadeleşir.'],
+['Atwood makinesinde m₁ = m₂ ise ne olur?',['Sistem hareket etmez ya da sabit hızla gider','Hızla düşerler','T sıfır olur','a = g olur'],0,'a = (m₂−m₁)g/(m₁+m₂) = 0. İvme yok: durur ya da sabit hızla sürer. T = mg olur.'],
+['Halat çekmede kazanan takım neden kazanır?',['Halata daha çok kuvvet uyguladığı için','Yere daha büyük kuvvet uygulayıp yerden daha büyük sürtünme aldığı için','Kütlesi çok olduğu için','Üçüncü yasa geçersiz olduğu için'],1,'Halatın iki ucundaki kuvvet eşittir. Farkı yaratan, yerin takımlara uyguladığı sürtünme kuvvetidir.']];
+let qR=0,qD=0;$('#quiz').innerHTML=Q.map(([q,o],i)=>`<div class="q" data-i="${i}"><h3>${i+1}. ${q}</h3><div class="o">${o.map(x=>`<button>${x}</button>`).join('')}</div></div>`).join('');
+$$('.q').forEach(c=>{const[, ,r,w]=Q[+c.dataset.i],bs=[...c.querySelectorAll('button')];bs.forEach((b,j)=>b.onclick=()=>{bs.forEach(x=>x.disabled=true);bs[r].classList.add('yes');if(j!==r)b.classList.add('no');else qR++;qD++;const p=document.createElement('p');p.className='why';p.textContent=w;c.append(p);$('#qs').textContent=`Doğru: ${qR} / ${qD}`})});
+
+fbdLoad();new ResizeObserver(drawAll).observe(document.body);drawAll();if(document.fonts)document.fonts.ready.then(drawAll);
+</script>
+<script>window.X_DATA={hints:{"v1": "Kutunun itildikten sonraki başlangıç hızı.", "mu1": "Yüzeyin pürüzlülüğü. 0 sürtünmesiz buz demektir.", "F2": "İki arabaya da uygulanan aynı kuvvet.", "m2a": "Kırmızı arabanın kütlesi.", "m2b": "Mavi arabanın kütlesi.", "m4": "Bloğun kütlesi. Kuvvetler değişir, sürtünmesiz ivme değişmez.", "th4": "Düzlemin eğimi. Arttıkça aşağı çeken bileşen büyür.", "us4": "Bloğun kaymaya başlamasını zorlaştırır.", "uk4": "Blok kayarken ortaya çıkan sürtünmeyi belirler.", "F4": "Artı değer yokuş yukarı, eksi değer yokuş aşağı iter.", "m5a": "Soldaki kütle.", "m5b": "Sağdaki kütle.", "m6a": "Soldaki patencinin kütlesi.", "m6b": "Sağdaki patencinin kütlesi.", "F6": "Patencilerin birbirini ittiği kuvvet; ikisine de eşit etkir.", "gF": "Kutuyu 2 s boyunca iten kuvvet. μₛ·m·g sınırını geçmeli."},gens:(R,C,n)=>[
+ ()=>{const m=C([2,4,5,8,10,20]),a=R(1,9);return{q:`${m} kg kütleli cisme net ${m*a} N kuvvet etki ediyor. İvmesi kaç m/s²'dir?`,a:a,u:'m/s²',s:[`a = F/m`,`a = ${m*a}/${m} = ${a} m/s²`]}},
+ ()=>{const m=C([2,4,5,10]),a=R(1,6),f=R(2,10)*5;return{q:`${m} kg kütleye sağa ${f+m*a} N, sola ${f} N etki ediyor. İvmenin büyüklüğü kaçtır?`,a:a,u:'m/s²',s:[`ΣF = ${f+m*a} − ${f} = ${m*a} N`,`a = ${m*a}/${m} = ${a} m/s²`]}},
+ ()=>{const m=C([2,4,5,10]),u=C([.1,.2,.25,.5]),a=R(1,5),F=m*a+u*m*10;return{q:`${m} kg kutu ${n(F)} N ile yatay itiliyor, μₖ = ${n(u)}. İvmesi kaç m/s²'dir?`,a:a,u:'m/s²',s:[`f = μₖ·m·g = ${n(u)}·${m}·10 = ${n(u*m*10)} N`,`a = (${n(F)} − ${n(u*m*10)})/${m} = ${a} m/s²`]}},
+ ()=>{const m=C([5,10,20]),us=C([.3,.4,.5]),F=R(1,6)*5,lim=us*m*10,slip=F>lim,uk=us-.1;const a=slip?uk*m*10:F;return{q:`${m} kg kutu duruyor (μₛ = ${n(us)}, μₖ = ${n(uk)}). ${F} N ile itilirse sürtünme kuvveti kaç N olur?`,a,u:'N',s:[`Sınır: μₛ·m·g = ${n(lim)} N`,slip?`${F} N sınırı aşıyor, kayar: f = μₖ·m·g = ${n(a)} N`:`${F} N sınırın altında, kutu durur: f = ${F} N`]}},
+ ()=>{const th=C([[30,.5,'0,5'],[37,.6,'0,6'],[53,.8,'0,8']]);return{q:`Sürtünmesiz ${th[0]}° eğik düzlemde bloğun ivmesi kaçtır? (sin ${th[0]}° = ${th[2]})`,a:10*th[1],u:'m/s²',s:[`a = g·sin θ, kütle sadeleşir`,`a = 10·${th[2]} = ${n(10*th[1])} m/s²`]}},
+ ()=>{const u=C([.25,.5]);return{q:`37° eğik düzlemde μₖ = ${n(u)} iken kayan bloğun ivmesi kaçtır? (sin 37° = 0,6; cos 37° = 0,8)`,a:10*(.6-u*.8),u:'m/s²',s:[`a = g(sin θ − μₖ cos θ)`,`a = 10·(0,6 − ${n(u)}·0,8) = ${n(10*(.6-u*.8))} m/s²`]}},
+ ()=>{const a=R(1,8),b=a+R(1,8);return{q:`Atwood makinesinde m₁ = ${a} kg, m₂ = ${b} kg. İvme kaç m/s²'dir?`,a:(b-a)*10/(a+b),u:'m/s²',s:[`a = (m₂−m₁)g/(m₁+m₂)`,`a = ${b-a}·10/${a+b} = ${n((b-a)*10/(a+b))} m/s²`]}},
+ ()=>{const a=R(1,8),b=a+R(1,8);return{q:`Atwood makinesinde m₁ = ${a} kg, m₂ = ${b} kg. İpteki gerilme kaç N'dur?`,a:2*a*b*10/(a+b),u:'N',s:[`T = 2m₁m₂g/(m₁+m₂)`,`T = 2·${a}·${b}·10/${a+b} = ${n(2*a*b*10/(a+b))} N`]}},
+ ()=>{const m=R(5,9)*10,a=R(1,4);return{q:`${m} kg kişi, ${a} m/s² ile yukarı hızlanan asansörde tartıda duruyor. Tartı kaç N gösterir?`,a:m*(10+a),u:'N',s:[`N − mg = ma`,`N = ${m}·(10 + ${a}) = ${m*(10+a)} N`]}},
+ ()=>{const m=R(5,9)*10,a=R(1,4);return{q:`${m} kg kişi, ${a} m/s² ile aşağı hızlanan asansörde tartıda duruyor. Tartı kaç N gösterir?`,a:m*(10-a),u:'N',s:[`mg − N = ma`,`N = ${m}·(10 − ${a}) = ${m*(10-a)} N`]}},
+ ()=>{const m1=C([40,50,60]),m2=C([80,100,120]),F=R(2,8)*50;return{q:`${m1} kg ve ${m2} kg patenciler birbirini ${F} N ile itiyor. ${m2} kg olanın ivmesi kaçtır?`,a:F/m2,u:'m/s²',s:[`Üçüncü yasa: ikisine de ${F} N etkir`,`a = ${F}/${m2} = ${n(F/m2)} m/s²`]}}
+],example:{"q": "5 kg blok 37° eğik düzlemden aşağı kayıyor. μₖ = 0,25, g = 10 m/s², sin 37° = 0,6, cos 37° = 0,8. Bloğun ivmesini ve 4 s sonraki hızını bul (ilk hız sıfır).", "steps": [["Serbest cisim diyagramını çiz. Üç kuvvet var: ağırlık, normal ve sürtünme. Ekseni yüzey boyunca seç.", "W = m·g = 5·10 = 50 N"], ["Ağırlığı bileşenlerine ayır.", "W∥ = 50·0,6 = 30 N &nbsp; W⊥ = 50·0,8 = 40 N"], ["Yüzeye dik doğrultuda ivme yoktur, buradan N çıkar.", "ΣF⊥ = 0 → N = 40 N"], ["Sürtünme kuvvetini hesapla. Yönü harekete zıttır, yani yokuş yukarıdır.", "f = μₖ·N = 0,25·40 = 10 N"], ["Yüzey boyunca ikinci yasayı yaz.", "30 − 10 = 5·a → a = 4 m/s²"], ["Sabit ivmeli hareket denklemiyle hızı bul.", "v = a·t = 4·4 = 16 m/s"]]},cards:[["Birinci yasa", "Net kuvvet sıfırsa cisim durur ya da sabit hızla düz gitmeyi sürdürür."], ["Eylemsizlik", "Cismin hız değişimine gösterdiği direnç. Ölçüsü kütledir."], ["İkinci yasa", "ΣF = m·a. İvme net kuvvetle aynı yöndedir."], ["Üçüncü yasa", "Kuvvetler çiftler halindedir: eşit, zıt ve farklı cisimlere etki eder."], ["Ağırlık", "W = m·g. Birimi newton. Gezegene göre değişir, kütle değişmez."], ["Normal kuvvet", "Yüzeyin cisme dik uyguladığı kuvvet. Her zaman mg'ye eşit değildir."], ["Statik sürtünme", "f ≤ μₛN. Cismi durdurmak için gerektiği kadar büyür."], ["Kinetik sürtünme", "f = μₖN. Kayan cisimde sabittir, genellikle statikten küçüktür."], ["Gerilme", "İpin çektiği kuvvet. Kütlesiz ipte iki uçta aynıdır."], ["Serbest cisim diyagramı", "Cismi yalnız çizip yalnızca ona etkiyen dış kuvvetleri göstermek."]]};
+(function(){
+const D=window.X_DATA,$a=s=>[...document.querySelectorAll(s)],q=s=>document.querySelector(s);
+const nf=(x,st)=>{const d=st>=1?0:st>=.1&&Math.abs(st*10-Math.round(st*10))<1e-9?1:2;return x.toFixed(d).replace('.',',').replace('-','−')};
+function fill(i){const mn=+i.min,mx=+i.max,p=x=>(x-mn)/(mx-mn)*100,v=+i.value,o=mn<0&&mx>0?0:mn,a=Math.min(p(o),p(v)),b=Math.max(p(o),p(v));i.style.setProperty('--a',a+'%');i.style.setProperty('--b',b+'%')}
+window.refreshSliders=()=>$a('input.sl').forEach(fill);
+$a('[data-s]').forEach(e=>{const[id,,mn,mx,st,,u]=e.dataset.s.split('|'),i=e.querySelector('input');if(!i)return;i.classList.add('sl');
+ const row=document.createElement('div');row.className='slrow';const mk=(t,s,l)=>{const b=document.createElement('button');b.type='button';b.textContent=t;b.setAttribute('aria-label',l);let tm;const go=()=>{const nv=Math.max(+mn,Math.min(+mx,+i.value+s*(+st)));i.value=nv;i.dispatchEvent(new Event('input',{bubbles:true}))};
+  b.addEventListener('click',ev=>{if(ev.detail===0)go()});b.addEventListener('pointerdown',ev=>{ev.preventDefault();go();tm=setTimeout(function r(){go();tm=setTimeout(r,70)},380)});['pointerup','pointerleave','pointercancel'].forEach(n=>b.addEventListener(n,()=>clearTimeout(tm)));return b};
+ i.replaceWith(row);row.append(mk('−',-1,'Azalt'),i,mk('+',1,'Artır'));
+ const sc=document.createElement('div');sc.className='slscale';sc.innerHTML=`<span class="mn">${nf(+mn,+st)}${u?' '+u:''}</span>${+mn<0&&+mx>0?`<span class="zr" style="left:${-mn/(mx-mn)*100}%">0</span>`:''}<span class="mx">${nf(+mx,+st)}${u?' '+u:''}</span>`;row.after(sc);
+ const h=D.hints[id];if(h){const p=document.createElement('p');p.className='slhint';p.textContent=h;sc.after(p)}
+ i.addEventListener('input',()=>fill(i));fill(i)});
+$a('.ctl').forEach(c=>{const d=document.createElement('div');d.className='slcap';d.textContent='Ayarlar: çubuğu sürükle ya da − / + düğmesine bas. Sonuç anında değişir.';c.prepend(d)});
+
+// soru makinesi
+const R=(a,b)=>a+Math.floor(Math.random()*(b-a+1)),C=a=>a[R(0,a.length-1)],n=x=>String(Math.round(x*100)/100).replace('.',',').replace('-','−');
+const gens=D.gens(R,C,n);let cur,seen=0,good=0,run=0,answered=false,lastG=-1;
+function next(){let k;do{k=R(0,gens.length-1)}while(k===lastG&&gens.length>1);lastG=k;cur=gens[k]();answered=false;q('#xmq').textContent=cur.q;q('#xmu').textContent=cur.u||'';const i=q('#xmi');i.value='';q('#xmr').textContent='';q('#xmr').className='xres';q('#xms').innerHTML='';q('#xmc').textContent='Kontrol et'}
+function stat(){q('#xm1').textContent=good+' / '+seen;q('#xm2').textContent=run}
+function show(){q('#xms').innerHTML=cur.s.map(x=>`<li>${x}</li>`).join('')}
+q('#xmc').onclick=()=>{if(answered)return next();const v=parseFloat(q('#xmi').value.replace(',','.').replace('−','-')),r=q('#xmr');if(isNaN(v)){r.textContent='Önce sayısal bir cevap yaz.';r.className='xres bad';return}
+ const ok=Math.abs(v-cur.a)<=Math.max(cur.t||0,Math.abs(cur.a)*.01,.011);seen++;answered=true;if(ok){good++;run++;r.textContent='Doğru!';r.className='xres ok'}else{run=0;r.textContent='Doğru cevap: '+n(cur.a)+(cur.u?' '+cur.u:'');r.className='xres bad'}show();stat();q('#xmc').textContent='Yeni soru →'};
+q('#xmn').onclick=()=>{if(answered)next();else{show();q('#xmr').textContent='Doğru cevap: '+n(cur.a)+(cur.u?' '+cur.u:'');q('#xmr').className='xres';answered=true;q('#xmc').textContent='Yeni soru →'}};
+q('#xmi').addEventListener('keydown',e=>{if(e.key==='Enter')q('#xmc').click()});
+next();stat();
+
+// çözümlü örnek
+const ex=D.example;q('#xeq').textContent=ex.q;let si=0;const ol=q('#xel'),nb=q('#xen');
+function step(){if(si>=ex.steps.length){si=0;ol.innerHTML='';nb.textContent='İlk adımı göster';return}const[t,c]=ex.steps[si++],li=document.createElement('li');li.innerHTML=`<i>${si}.</i><div>${t}<code>${c}</code></div>`;ol.append(li);nb.textContent=si>=ex.steps.length?'Baştan başla':'Sonraki adım →'}
+nb.onclick=step;nb.textContent='İlk adımı göster';
+
+// kartlar
+q('#xcs').innerHTML=D.cards.map(([a,b])=>`<button class="xc" type="button" aria-label="${a}: kartı çevir"><span class="xci"><span class="xf"><b>${a}</b><small>Çevirmek için dokun</small></span><span class="xf bk"><span>${b}</span><small>${a}</small></span></span></button>`).join('');
+$a('.xc').forEach(c=>c.onclick=()=>c.classList.toggle('fl'));
+if(typeof drawAll==='function'){drawAll();requestAnimationFrame(drawAll)}
+})();
+</script>
+</body>
+</html>

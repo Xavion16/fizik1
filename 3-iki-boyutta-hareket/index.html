@@ -1,0 +1,379 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>İki Hareket, Tek Top</title>
+<meta name="description" content="İki boyutta hareketi anlatan etkileşimli ders: eğik atış, düzgün dairesel hareket ve bağıl hareket simülasyonları.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%2307080f'/%3E%3Cpath d='M4 26Q16-6 28 26' fill='none' stroke='%23ffb347' stroke-width='3.5'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;800&family=Manrope:wght@400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#07080f;--p:#10121f;--line:#2a2e45;--t:#eef0fa;--soft:#9aa0bd;--o:#ffb347;--c:#4de8ff;--m:#ff5fa2;--l:#b8ff5c;--mono:"JetBrains Mono",Consolas,monospace}
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--t);font:400 17px/1.6 Manrope,system-ui,sans-serif;overflow-x:hidden}
+canvas{display:block;width:100%;touch-action:pan-y}
+.w{max-width:1320px;margin:auto;padding:0 28px}
+.hero{height:100vh;min-height:600px;position:relative;overflow:hidden}
+.hero canvas{position:absolute;inset:0;height:100%}
+.hin{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:flex-end;pointer-events:none;}
+.hin a{pointer-events:auto}.hin .w{margin:0 auto;width:100%}
+.kick{font:400 12px var(--mono);color:var(--o);margin:0 0 12px}
+h1{font:800 clamp(46px,min(11vw,15vh),168px)/.9 Syne,sans-serif;letter-spacing:-.04em;margin:0 0 20px}
+h1 em{font-style:normal;color:transparent;-webkit-text-stroke:2px var(--o)}
+.lede{font-size:clamp(19px,2vw,25px);line-height:1.35;max-width:30em;margin:0 0 26px}
+nav{display:flex;flex-wrap:wrap;gap:6px 18px;font:400 13px var(--mono);padding-bottom:24px}nav a{color:var(--soft);text-decoration:none}nav a:hover{color:var(--o)}
+.ch{padding-top:84px;padding-bottom:12px}
+.head{display:grid;grid-template-columns:minmax(0,6fr) minmax(0,6fr);gap:40px;align-items:end;margin-bottom:24px}
+.n{font:400 12px var(--mono);color:var(--o);margin-bottom:12px}
+h2{font:800 clamp(32px,5vw,70px)/.98 Syne;letter-spacing:-.03em;margin:0}
+.head p{margin:0 0 12px}.head p:last-child{margin:0}
+.stage{border:1px solid var(--line);border-radius:18px;overflow:hidden;background:var(--p);min-width:0}
+.stage canvas{background:#090b15}
+.ctl{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px 22px;padding:14px 18px;border-top:1px solid var(--line)}
+.f label{display:flex;justify-content:space-between;gap:8px;font:400 12px var(--mono);color:var(--soft)}.f output{color:var(--t);font-weight:700}
+input[type=range]{width:100%;accent-color:var(--o);margin:6px 0 0}
+select{width:100%;margin-top:6px;background:#191c2e;color:var(--t);border:1px solid var(--line);border-radius:8px;padding:6px;font:400 13px var(--mono)}
+.read{display:grid;grid-template-columns:repeat(auto-fit,minmax(112px,1fr));border-top:1px solid var(--line)}
+.read div{padding:10px 18px;font:400 11px var(--mono);color:var(--soft);border-right:1px solid var(--line)}
+.read b{display:block;font:700 18px var(--mono);color:var(--t)}
+.btns{display:flex;flex-wrap:wrap;gap:8px;padding:14px 18px;border-top:1px solid var(--line);align-items:center}
+button{font:600 14px Manrope;padding:9px 16px;border-radius:99px;background:#1b1e32;border:1px solid var(--line);color:var(--t);cursor:pointer}
+button:hover{border-color:var(--o)}button.go{background:var(--o);border-color:var(--o);color:#141007;font-weight:800}button.go:hover{background:#ffc873}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--c);outline-offset:2px}
+.guess{background:linear-gradient(120deg,#23180a,#10121f 65%);border:1px solid #6e4d1f;border-radius:18px;padding:18px 20px;margin-bottom:16px}
+.guess h3{font:700 12px var(--mono);color:var(--o);margin:0 0 6px}.guess p{font-size:20px;line-height:1.3;margin:0 0 12px}
+.o{display:flex;flex-wrap:wrap;gap:8px}
+.yes,.yes:hover{background:var(--l)!important;border-color:var(--l)!important;color:#111!important;font-weight:800}.no,.no:hover{background:var(--m)!important;border-color:var(--m)!important;color:#111!important}
+.after{display:none;margin-top:12px}.guess.done .after{display:block}
+.eq{font:700 16px/1.65 var(--mono);color:var(--o);overflow-wrap:anywhere}
+.tri{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin-top:14px}
+.tri>div{border-top:2px solid var(--line);padding-top:12px;font-size:16px}.tri h4{margin:0 0 6px;font:800 16px Manrope}
+.legend{display:flex;flex-wrap:wrap;gap:10px 18px;font:400 12px var(--mono);color:var(--soft);margin-left:auto}.legend i{display:inline-block;width:11px;height:11px;border-radius:50%;margin-right:5px;vertical-align:-1px}
+#gMsg{padding:12px 18px;border-top:1px solid var(--line);font:400 14px var(--mono);min-height:46px}
+.qs{display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:14px}
+.q{background:var(--p);border:1px solid var(--line);border-radius:18px;padding:20px}.q h3{font:600 18px/1.3 Manrope;margin:0 0 12px}.q .o{display:grid;grid-template-columns:1fr 1fr}.q button{border-radius:12px;text-align:left;font-weight:400}.q button:disabled{cursor:default}.q .why{margin:12px 0 0;color:var(--soft);font-size:15px}
+#me{margin-top:90px;padding:90px 0;background:radial-gradient(90% 130% at 80% 0,#3b2306,#07080f 70%);border-top:1px solid var(--line)}
+#me .g{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:40px;align-items:center}
+#me h2{font-size:clamp(38px,10vw,140px)}#me small{font:400 12px var(--mono);color:var(--soft);display:block;margin-top:18px}
+@media(max-width:820px){.head,#me .g{grid-template-columns:minmax(0,1fr);gap:18px}.w{padding:0 16px}.ch{padding-top:56px}.qs{grid-template-columns:minmax(0,1fr)}.q .o{grid-template-columns:minmax(0,1fr)}}
+</style>
+
+<style id="x-style">
+.ctl{grid-template-columns:repeat(auto-fit,minmax(215px,1fr))!important}
+.slcap{grid-column:1/-1;font:600 13px/1.35 var(--x-body);color:var(--x-soft);display:flex;gap:8px;align-items:center}
+.slcap::before{content:"";width:10px;height:10px;background:var(--x-accent);border-radius:var(--x-dot);flex:none}
+.ctl .f label{font:700 14px/1.25 var(--x-body);color:inherit;align-items:baseline;margin-bottom:6px}
+.ctl .f label output{font:700 18px var(--mono);white-space:nowrap;color:inherit}
+.slrow{display:flex;align-items:center;gap:7px}
+.slrow button{flex:none;width:36px;height:36px;padding:0;font:700 20px/1 var(--mono);border-radius:var(--x-r);box-shadow:none!important;transform:none!important;touch-action:manipulation;user-select:none}
+input[type=range].sl{-webkit-appearance:none;appearance:none;flex:1;min-width:0;height:36px;margin:0;background:transparent;cursor:ew-resize;touch-action:none}
+.sl::-webkit-slider-runnable-track{height:12px;border-radius:var(--x-r);border:var(--x-track-bd);background:linear-gradient(to right,var(--x-rest) var(--a),var(--x-accent) var(--a),var(--x-accent) var(--b),var(--x-rest) var(--b))}
+.sl::-moz-range-track{height:12px;border-radius:var(--x-r);border:var(--x-track-bd);background:linear-gradient(to right,var(--x-rest) var(--a),var(--x-accent) var(--a),var(--x-accent) var(--b),var(--x-rest) var(--b))}
+.sl::-webkit-slider-thumb{-webkit-appearance:none;width:26px;height:26px;margin-top:-8px;border-radius:var(--x-dot);background:var(--x-thumb);border:3px solid var(--x-thumb-bd);box-shadow:0 2px 6px #0006;cursor:grab}
+.sl::-moz-range-thumb{width:20px;height:20px;border-radius:var(--x-dot);background:var(--x-thumb);border:3px solid var(--x-thumb-bd);box-shadow:0 2px 6px #0006;cursor:grab}
+.slscale{position:relative;height:16px;margin:0 43px;font:400 11px var(--mono);color:var(--x-soft)}
+.slscale span{position:absolute;top:0;white-space:nowrap}.slscale .mn{left:0}.slscale .mx{right:0}.slscale .zr{transform:translateX(-50%)}
+.slhint{margin:4px 0 0!important;font:400 13px/1.35 var(--x-body)!important;color:var(--x-soft)!important}
+.xs{padding-top:72px;padding-bottom:6px}
+.xs h2{margin-bottom:10px}
+.xlead{max-width:62ch;margin:0 0 18px;color:var(--x-soft)}
+.xbox{background:var(--x-card);color:var(--x-ink);border:var(--x-bd);border-radius:var(--x-rb);padding:22px;box-shadow:var(--x-sh)}
+.xm{display:grid;grid-template-columns:minmax(0,3fr) minmax(0,2fr);gap:26px}
+.xq{font:600 clamp(20px,2.2vw,26px)/1.3 var(--x-body);margin:0 0 16px}
+.xin{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.xin input{width:150px;padding:10px 12px;font:700 18px var(--mono);border:var(--x-bd);border-radius:var(--x-r);background:var(--x-field);color:var(--x-ink)}
+.xin span{font:700 15px var(--mono)}
+.xbox button{cursor:pointer}
+.xres{margin-top:14px;font:700 16px var(--x-body);min-height:24px}.xres.ok{color:var(--x-ok)}.xres.bad{color:var(--x-bad)}
+.xsteps{margin:10px 0 0;padding-left:22px;font:400 15px/1.65 var(--mono);overflow-wrap:anywhere}.xsteps li{margin-bottom:4px}
+.xstat{display:grid;grid-template-columns:1fr 1fr;gap:10px;align-content:start}
+.xstat div{border:var(--x-bd);border-radius:var(--x-r);padding:12px;font:400 12px var(--mono);color:var(--x-soft)}.xstat b{display:block;font:700 30px/1.1 var(--mono);color:var(--x-ink)}
+.xstat p{grid-column:1/-1;margin:4px 0 0;font:400 14px/1.45 var(--x-body);color:var(--x-soft)}
+.xex{font:600 clamp(18px,2vw,23px)/1.35 var(--x-body);margin:0 0 14px}
+.xdo{list-style:none;margin:0 0 14px;padding:0}.xdo li{padding:12px 0;border-top:1px solid var(--x-line);display:grid;grid-template-columns:32px minmax(0,1fr);gap:8px;font-size:16px}
+.xdo li>i{font:700 16px var(--mono);font-style:normal;color:var(--x-accent-t)}.xdo code{display:block;font:700 15px/1.6 var(--mono);margin-top:3px;white-space:normal}
+.xcards{display:grid;grid-template-columns:repeat(auto-fill,minmax(235px,1fr));gap:14px}
+.xc{perspective:900px;height:190px;padding:0!important;background:none!important;border:0!important;box-shadow:none!important;transform:none!important;color:var(--x-ink);text-align:left;font:inherit;cursor:pointer}
+.xci{position:relative;display:block;width:100%;height:100%;transition:transform .45s;transform-style:preserve-3d}
+.xc.fl .xci{transform:rotateY(180deg)}
+.xf{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:space-between;padding:16px;backface-visibility:hidden;-webkit-backface-visibility:hidden;border:var(--x-bd);border-radius:var(--x-rb);background:var(--x-card)}
+.xf b{font:700 21px/1.15 var(--x-body)}.xf small{font:400 11px var(--mono);color:var(--x-soft)}
+.xf.bk{transform:rotateY(180deg);background:var(--x-accent);color:var(--x-accent-ink);font:600 15px/1.4 var(--x-body);border-color:var(--x-accent)}
+.xf.bk small{color:inherit;opacity:.75}
+.xmail{display:inline-block;margin-top:6px;font:700 clamp(15px,1.8vw,20px) var(--mono);color:inherit;overflow-wrap:anywhere}
+@media(prefers-reduced-motion:reduce){.xci{transition:none}}
+@media(max-width:820px){.xm{grid-template-columns:minmax(0,1fr)}.xbox{padding:16px}.xcards{grid-template-columns:repeat(auto-fill,minmax(160px,1fr))}.xc{height:220px}.xf b{font-size:18px}.xf.bk{font-size:14px}}
+</style>
+<style>:root{--x-body:Manrope,system-ui,sans-serif;--x-card:#10121f;--x-ink:#eef0fa;--x-soft:#9aa0bd;--x-line:#2a2e45;--x-accent:#ffb347;--x-accent-t:#ffb347;--x-accent-ink:#141007;--x-rest:#2a2e45;--x-thumb:#fff;--x-thumb-bd:#ffb347;--x-track-bd:0;--x-r:99px;--x-rb:18px;--x-dot:50%;--x-bd:1px solid #3a3f5c;--x-sh:none;--x-field:#191c2e;--x-ok:#b8ff5c;--x-bad:#ff5fa2}</style>
+<style>.xlinks{margin:18px 0 0;display:flex;flex-wrap:wrap;gap:6px 16px;font:700 14px var(--mono)}.xlinks a{color:inherit;text-underline-offset:3px}.xlinks span{width:100%;font-weight:400}</style>
+</head>
+<body>
+<section class="hero"><canvas id="hero" aria-hidden="true"></canvas>
+  <div class="hin"><div class="w"><p class="kick">FİZİK 1 · DERS 03 · İKİ BOYUTTA HAREKET</p><h1>İki hareket,<br><em>tek top</em></h1><p class="lede">Havadaki bir top aslında aynı anda iki şey yapar. Yerdeki gölgesi sabit hızla kayar, duvardaki gölgesi yukarı atılmış gibi iner. Bütün konu bu tek fikirden çıkar.</p>
+  <nav aria-label="Bölümler"><a href="#c1">01 Bağımsızlık</a><a href="#c2">02 Eğik atış</a><a href="#c3">03 Menzil</a><a href="#c4">04 Dairesel</a><a href="#c5">05 Bağıl</a><a href="#c6">06 Oyun</a><a href="#c7">07 Test</a><a href="#xm">Soru makinesi</a><a href="#xe">Çözümlü örnek</a><a href="#xk">Bilgi kartları</a><a href="#me">Hakkımda</a></nav></div></div>
+</section>
+
+<section class="ch w" id="c1">
+  <div class="head"><div><div class="n">01 / BAĞIMSIZLIK</div><h2>Hangisi yere önce düşer?</h2></div><div><p>Hareketi anlamanın anahtarı şudur: yerçekimi yatay hızla ilgilenmez. Düşme süresini <b>yalnızca yükseklik</b> belirler.</p></div></div>
+  <div class="guess" data-guess><h3>ÖNCE TAHMİN ET</h3><p>Aynı anda, aynı yükseklikten biri serbest bırakılıyor, biri yatay fırlatılıyor. Hangisi yere önce çarpar?</p><div class="o"><button>Serbest bırakılan</button><button>Fırlatılan</button><button data-ok>Aynı anda çarparlar</button></div><div class="after">Aynı anda çarparlar. Aşağıda deneyi başlat: her fotoğraf karesinde iki top <b>hep aynı yükseklikte</b>. Yatay hızı artırsan da düşme süresi değişmez, yalnızca düştüğü yer uzaklaşır.</div></div>
+  <div class="stage"><canvas id="c1c" style="height:440px" role="img" aria-label="Biri serbest düşen, biri yatay atılan iki top"></canvas>
+    <div class="ctl"><div class="f" data-s="vx|Yatay hız|0|30|1|15|m/s"></div><div class="f" data-s="hh|Yükseklik|10|60|5|45|m"></div></div>
+    <div class="btns"><button class="go" id="p1">▶ Bırak</button></div>
+    <div class="read"><div>Düşme süresi t = √(2h/g)<b id="r1t"></b></div><div>Yatay menzil x = vₓ·t<b id="r1x"></b></div></div></div>
+</section>
+
+<section class="ch w" id="c2">
+  <div class="head"><div><div class="n">02 / EĞİK ATIŞ</div><h2>Gölgeleri izle, denklemler kendini yazsın</h2></div><div><p>Topun yerdeki gölgesindeki işaretler eşit aralıklı: <b>x yönünde sabit hız</b>. Duvardaki işaretler ise tepeye doğru sıklaşıp sonra açılıyor: <b>y yönünde sabit ivme</b>.</p><div class="eq">vₓ = v₀cos θ · x = vₓt<br>vᵧ = v₀sin θ − gt · y = h + v₀sin θ·t − ½gt²</div></div></div>
+  <div class="guess" data-guess><h3>ÖNCE TAHMİN ET</h3><p>Top yörüngenin en tepesindeyken hızı ve ivmesi nedir?</p><div class="o"><button>İkisi de sıfır</button><button>Hız sıfır, ivme g</button><button data-ok>Hız vₓ (yatay), ivme g</button></div><div class="after">Tepede yalnızca <b>vᵧ</b> sıfırdır; yatay hız aynen sürer. İvme her an g'dir, tepede de yerçekimi kapanmaz. Sıfır olsaydı top orada asılı kalırdı.</div></div>
+  <div class="stage"><canvas id="c2c" style="height:500px" role="img" aria-label="Eğik atış simülasyonu"></canvas>
+    <canvas id="c2g" style="height:130px;border-top:1px solid var(--line)" role="img" aria-label="Hız bileşenleri zaman grafiği"></canvas>
+    <div class="ctl"><div class="f" data-s="v0|v₀|5|60|1|30|m/s"></div><div class="f" data-s="th|θ|0|90|1|55|°"></div><div class="f" data-s="h0|Başlangıç yüksekliği|0|40|1|0|m"></div><div class="f"><label for="pl">Gezegen</label><select id="pl"><option value="9.81">Dünya · 9,81</option><option value="1.62">Ay · 1,62</option><option value="3.71">Mars · 3,71</option><option value="24.79">Jüpiter · 24,79</option></select></div></div>
+    <div class="btns"><button class="go" id="p2">▶ Fırlat</button><button id="slow">Yavaş çekim: kapalı</button><div class="legend"><span><i style="background:#ffb347"></i>v</span><span><i style="background:#4de8ff"></i>vₓ</span><span><i style="background:#ff5fa2"></i>vᵧ</span></div></div>
+    <div class="read"><div>Uçuş süresi<b id="r2T"></b></div><div>Menzil<b id="r2R"></b></div><div>Tepe<b id="r2H"></b></div><div>t<b id="r2t"></b></div><div>vₓ<b id="r2x"></b></div><div>vᵧ<b id="r2y"></b></div><div>|v|<b id="r2v"></b></div></div></div>
+</section>
+
+<section class="ch w" id="c3">
+  <div class="head"><div><div class="n">03 / MENZİL</div><h2>Neden 45°?</h2></div><div><div class="eq">R = v₀² · sin 2θ / g &nbsp; H = v₀²sin²θ / 2g</div><p>sin 2θ en çok 1 olabilir, o da θ = 45°'de olur. Bir de güzel sonuç var: sin 2θ = sin(180° − 2θ) olduğundan <b>θ ve 90° − θ aynı menzile düşer</b>. Yani 30° ile 60° aynı yere varır, biri kısa ve hızlı, öteki uzun ve yüksek yoldan.</p><p>Uyarı: bu formül yalnızca başladığın yüksekliğe geri düşüyorsan geçerlidir. Yüksekten atarsan en iyi açı 45°'nin altına iner.</p></div></div>
+  <div class="stage"><canvas id="c3c" style="height:400px" role="img" aria-label="Tümler açıların yörüngeleri"></canvas>
+    <div class="ctl"><div class="f" data-s="t3|θ|5|85|1|30|°"></div><div class="f" data-s="v3|v₀|10|50|1|30|m/s"></div></div>
+    <div class="read"><div id="l3a">θ menzili<b id="r3a"></b></div><div id="l3b">Tümleyen menzili<b id="r3b"></b></div><div>45° menzili (en büyük)<b id="r3m"></b></div><div>Havada kalma (turuncu / mavi)<b id="r3t"></b></div></div></div>
+</section>
+
+<section class="ch w" id="c4">
+  <div class="head"><div><div class="n">04 / DÜZGÜN DAİRESEL HAREKET</div><h2>Sürati sabit ama hızlanıyor</h2></div><div><p>Hız bir vektördür. Boyu aynı kalsa bile yönü değişiyorsa hız değişiyordur, yani ivme vardır. Sağdaki panelde iki farklı andaki hız oklarını aynı yerden başlattık. Aralarındaki fark Δv, <b>merkeze doğru</b> bakıyor.</p><div class="eq">a_c = v²/r = ω²r · T = 2πr/v · ω = v/r</div></div></div>
+  <div class="guess" data-guess><h3>ÖNCE TAHMİN ET</h3><p>İpe bağlı dönen bir taşın ipi kesilirse taş nasıl gider?</p><div class="o"><button>Merkezden dışarı doğru</button><button data-ok>O anki hızı doğrultusunda, teğet</button><button>Daire çizmeye devam eder</button></div><div class="after">Kuvvet kalkınca ivme de biter, taş o anki hızıyla düz gider (yerçekimini saymazsak). “Dışarı savuran” bir kuvvet yoktur. İpi kes düğmesiyle dene.</div></div>
+  <div class="stage"><canvas id="c4c" style="height:430px" role="img" aria-label="Dairesel hareket ve hız farkı"></canvas>
+    <div class="ctl"><div class="f" data-s="r4|Yarıçap r|1|10|0.5|5|m"></div><div class="f" data-s="v4|Sürat v|1|20|1|6|m/s"></div><div class="f" data-s="dp|Δv için açı aralığı|10|120|5|60|°"></div></div>
+    <div class="btns"><button class="go" id="cut">✂ İpi kes</button><div class="legend"><span><i style="background:#4de8ff"></i>v</span><span><i style="background:#b8ff5c"></i>a ve Δv</span></div></div>
+    <div class="read"><div>a_c<b id="r4a"></b></div><div>Periyot T<b id="r4T"></b></div><div>Frekans f<b id="r4f"></b></div><div>ω<b id="r4w"></b></div></div></div>
+</section>
+
+<section class="ch w" id="c5">
+  <div class="head"><div><div class="n">05 / BAĞIL HAREKET</div><h2>Nehir seni sürükler, ama geciktirmez</h2></div><div><p>Kayığın yere göre hızı, suya göre hızı ile suyun yere göre hızının vektörel toplamıdır. Karşıya geçme süresini yalnızca <b>akıntıya dik bileşen</b> belirler. Yine aynı fikir: dik yönler birbirini etkilemez.</p><div class="eq">v_kayık/yer = v_kayık/su + v_su/yer<br>t = d / (v sin θ) · sürüklenme = (u + v cos θ)·t</div></div></div>
+  <div class="guess" data-guess><h3>ÖNCE TAHMİN ET</h3><p>Kayık burnunu tam karşıya tutuyor. Akıntı iki katına çıkarsa karşıya geçme süresi ne olur?</p><div class="o"><button>İki katına çıkar</button><button>Yarıya iner</button><button data-ok>Değişmez</button></div><div class="after">Süre aynı kalır, çünkü akıntı kıyıya paralel. Kayık yalnızca daha aşağıda karaya çıkar. Akıntıyı değiştirip iki kez dene.</div></div>
+  <div class="stage"><canvas id="c5c" style="height:420px" role="img" aria-label="Nehirde karşıya geçen kayık"></canvas>
+    <div class="ctl"><div class="f" data-s="d5|Nehir genişliği d|20|100|5|60|m"></div><div class="f" data-s="u5|Akıntı u|0|6|0.5|2|m/s"></div><div class="f" data-s="v5|Kayığın suya göre hızı v|1|8|0.5|4|m/s"></div><div class="f" data-s="a5|Burun açısı θ|10|170|1|90|°"></div></div>
+    <div class="btns"><button class="go" id="p5">▶ Yola çık (3× hızlı)</button><button id="st5">Tam karşıya çıkacak açı</button><span id="m5" style="font:400 13px var(--mono);color:var(--soft)"></span></div>
+    <div class="read"><div>Geçiş süresi<b id="r5t"></b></div><div>Sürüklenme<b id="r5d"></b></div><div>Yere göre hız<b id="r5v"></b></div></div></div>
+</section>
+
+<section class="ch w" id="c6">
+  <div class="head"><div><div class="n">06 / OYUN</div><h2>Hedefi vur</h2></div><div><p>Her hedef için 3 atışın var. Önce hesapla: <b>t = x/(v₀cos θ)</b> süresini bulup <b>y = v₀sin θ·t − ½gt²</b> içine koy. Bu denklemi kullanırsan ilk atışta vurabilirsin. g = 9,81 m/s².</p></div></div>
+  <div class="stage"><canvas id="gc" style="height:440px" role="img" aria-label="Hedef vurma oyunu"></canvas>
+    <div id="gMsg" aria-live="polite"></div>
+    <div class="ctl"><div class="f" data-s="gv|v₀|10|50|0.5|30|m/s"></div><div class="f" data-s="ga|θ|5|85|0.5|45|°"></div></div>
+    <div class="btns"><button class="go" id="gF">Ateş</button><span id="gS" style="font:700 14px var(--mono)"></span></div></div>
+</section>
+
+<section class="ch w" id="c7"><div class="head"><div><div class="n">07 / TEST</div><h2>Formül değil, fikir</h2></div><div class="eq" id="qs"></div></div><div class="qs" id="quiz"></div></section>
+
+
+<section class="xs w" id="xm"><h2>Soru makinesi</h2><p class="xlead">Sayılar her seferinde değişir, soru hiç bitmez. Kâğıda çöz, cevabını yaz ve çözümü kontrol et. Bu sorularda g = 10 m/s² alın.</p>
+<div class="xbox xm"><div><p class="xq" id="xmq"></p><div class="xin"><input id="xmi" inputmode="decimal" autocomplete="off" aria-label="Cevabın"><span id="xmu"></span><button class="go" id="xmc" type="button">Kontrol et</button><button id="xmn" type="button">Çözümü gör / geç</button></div><div class="xres" id="xmr" aria-live="polite"></div><ol class="xsteps" id="xms"></ol></div>
+<div class="xstat"><div>Doğru<b id="xm1">0 / 0</b></div><div>Seri<b id="xm2">0</b></div><p>Üst üste doğru yapabildiğin kadar devam et. Sınavdan önce 10'luk seri iyi bir hedef.</p></div></div></section>
+<section class="xs w" id="xe"><h2>Çözümlü örnek</h2><p class="xlead">Sınav tipi bir soru. Her adımdan önce durup kendin dene, sonra açıp karşılaştır.</p>
+<div class="xbox"><p class="xex" id="xeq"></p><ol class="xdo" id="xel"></ol><button class="go" id="xen" type="button"></button></div></section>
+<section class="xs w" id="xk"><h2>Bilgi kartları</h2><p class="xlead">Kavramı önce kendin tanımla, sonra kartı çevirip kontrol et.</p><div class="xcards" id="xcs"></div></section>
+<section id="me"><div class="w g"><h2>Hakkımda</h2><div><p>Ben Kadir Kara. Fizik 1 dersinde işlediğimiz her konu için bir etkileşimli çalışma hazırlıyorum; bu site onlardan biri.</p><p>Bu konuda beni en çok etkileyen şey, atıştan nehre kadar her problemin aynı fikre dayanması oldu: dik yönler birbirini etkilemez. Burada amacım o fikri ezberletmek değil, simülasyonda kendin görmeni sağlamak.</p><p>Diğer projelerim için bana yazabilirsin:<br><a class="xmail" href="mailto:kadirkara1643@gmail.com">kadirkara1643@gmail.com</a></p><nav class="xlinks" aria-label="Diğer dersler"><span>Diğer dersler:</span><a href="../1-bir-boyutta-hareket/">Bir boyutta hareket</a><a href="../2-vektorler/">Vektörler</a><a href="../4-hareket-yasalari/">Hareket yasaları</a><a href="../">Tüm dersler</a></nav><small>Fizik 1 · Ödev projesi</small></div></div></section>
+
+<script>
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const O='#ffb347',C='#4de8ff',M='#ff5fa2',L='#b8ff5c',T='#eef0fa',SO='#9aa0bd',LN='#2a2e45',MONO='"JetBrains Mono",monospace',D=Math.PI/180;
+const fmt=(n,d=1)=>{if(Math.abs(n)<.5*10**-d)n=0;return n.toFixed(d).replace('.',',').replace('-','−')};
+const P={},views=[];let G0=9.81;
+$$('[data-s]').forEach(e=>{const[id,l,mn,mx,st,v,u]=e.dataset.s.split('|');P[id]=+v;const dg=st<1?1:0;e.innerHTML=`<label for="s_${id}">${l}<output id="o_${id}">${fmt(+v,dg)} ${u}</output></label><input id="s_${id}" type="range" min="${mn}" max="${mx}" step="${st}" value="${v}">`;e.querySelector('input').oninput=ev=>{P[id]=+ev.target.value;$('#o_'+id).textContent=fmt(P[id],dg)+' '+u;e.dispatchEvent(new CustomEvent('chg',{bubbles:true,detail:id}));drawAll()}});
+function view(id,fn){const c=$(id),v={c,draw(){const r=c.getBoundingClientRect(),d=devicePixelRatio||1;if(!r.width)return;c.width=r.width*d;c.height=r.height*d;const g=c.getContext('2d');g.setTransform(d,0,0,d,0,0);g.lineCap='round';g.lineJoin='round';fn(g,r.width,r.height)}};views.push(v);return v}
+const drawAll=()=>views.forEach(v=>v.draw());
+function arrow(g,x1,y1,x2,y2,c,w=3,lab){const a=Math.atan2(y2-y1,x2-x1),L_=Math.hypot(x2-x1,y2-y1),h=Math.min(11,L_*.5);if(L_<1)return;g.strokeStyle=g.fillStyle=c;g.lineWidth=w;g.beginPath();g.moveTo(x1,y1);g.lineTo(x2-Math.cos(a)*h*.7,y2-Math.sin(a)*h*.7);g.stroke();g.beginPath();g.moveTo(x2,y2);g.lineTo(x2-h*Math.cos(a-.42),y2-h*Math.sin(a-.42));g.lineTo(x2-h*Math.cos(a+.42),y2-h*Math.sin(a+.42));g.fill();if(lab){g.font='700 12px '+MONO;g.textAlign='center';g.textBaseline='middle';g.fillText(lab,x2+Math.cos(a)*14,y2+Math.sin(a)*14)}}
+function txt(g,s,x,y,c=SO,al='left',f='11px '+MONO){g.fillStyle=c;g.font=f;g.textAlign=al;g.textBaseline='middle';g.fillText(s,x,y)}
+function ball(g,x,y,c,r=7){g.save();g.shadowColor=c;g.shadowBlur=18;g.fillStyle=c;g.beginPath();g.arc(x,y,r,0,7);g.fill();g.restore()}
+function glowLine(g,pts,c,w=2.5){if(pts.length<2)return;g.save();g.shadowColor=c;g.shadowBlur=10;g.strokeStyle=c;g.lineWidth=w;g.beginPath();pts.forEach(([x,y],i)=>i?g.lineTo(x,y):g.moveTo(x,y));g.stroke();g.restore()}
+const nice=(r,n)=>{const a=r/n,p=10**Math.floor(Math.log10(a||1)),m=a/p;return(m<1.5?1:m<3?2:m<7?5:10)*p};
+const sims=[];let lastT=performance.now();
+function sim(o){o.on=!!o.on;sims.push(o);return o}
+(function tick(n){const dt=Math.min(.05,(n-lastT)/1000);lastT=n;sims.forEach(s=>{if(s.on&&s.step)s.step(dt)});requestAnimationFrame(tick)})(lastT);
+$$('[data-guess]').forEach(b=>{const bs=[...b.querySelectorAll('.o button')];bs.forEach(x=>x.onclick=()=>{if(b.classList.contains('done'))return;b.classList.add('done');bs.find(y=>'ok'in y.dataset).classList.add('yes');if(!('ok'in x.dataset))x.classList.add('no');drawAll()})});
+
+// kahraman
+const stars=Array.from({length:130},()=>[Math.random(),Math.random(),Math.random()*1.4+.2]);let hT=0;
+const hv=view('#hero',(g,w,h)=>{g.fillStyle='#07080f';g.fillRect(0,0,w,h);stars.forEach(([x,y,r])=>{g.fillStyle='#ffffff55';g.beginPath();g.arc(x*w,y*h,r,0,7);g.fill()});
+ const gy=h*.36,x0=w*.1,Wd=w*.8,Ht=h*.27,p=(hT%6)/6,X=s=>x0+s*Wd,Y=s=>gy-4*Ht*s*(1-s);
+ const pts=[];for(let i=0;i<=60;i++){const s=i/60*p;pts.push([X(s),Y(s)])}glowLine(g,pts,O,3);
+ g.strokeStyle='#ffffff30';g.lineWidth=1;g.beginPath();g.moveTo(x0-30,gy);g.lineTo(x0+Wd+30,gy);g.moveTo(x0-30,gy);g.lineTo(x0-30,gy-Ht-30);g.stroke();
+ for(let i=0;i<=12;i++){const s=i/12;if(s<=p){g.fillStyle=C;g.fillRect(X(s)-1.5,gy-5,3,10);g.fillStyle=M;g.fillRect(x0-35,Y(s)-1.5,10,3)}}
+ ball(g,X(p),gy,C,5);ball(g,x0-30,Y(p),M,5);ball(g,X(p),Y(p),O,9)});
+(function hl(n){if(!matchMedia('(prefers-reduced-motion:reduce)').matches){hT=n/1000;if(scrollY<innerHeight)hv.draw();requestAnimationFrame(hl)}})(0);
+
+// 1 bağımsızlık
+const s1=sim({t:0,step(dt){this.t+=dt*.8;const T=Math.sqrt(2*P.hh/9.81);if(this.t>=T){this.t=T;this.on=false;$('#p1').textContent='↺ Yeniden bırak'}v1.draw()}});
+const v1=view('#c1c',(g,w,h)=>{const T=Math.sqrt(2*P.hh/9.81),t=s1.t,u=Math.min((h-60)/(P.hh+8),(w-110)/(Math.max(P.vx,8)*T+6)),gx=60,gy=h-34,sy=y=>gy-y*u;
+ g.fillStyle='#14172a';g.fillRect(0,gy,w,34);g.fillStyle='#1b1f35';g.fillRect(gx-34,sy(P.hh),34,P.hh*u);line(g,0,gy,w,gy,'#ffffff55',1.5);
+ for(let i=0;i*.25<=t+1e-9;i++){const s=i*.25,y=P.hh-.5*9.81*s*s;g.strokeStyle='#ffffff25';g.lineWidth=1;g.setLineDash([3,5]);g.beginPath();g.moveTo(gx,sy(y));g.lineTo(w,sy(y));g.stroke();g.setLineDash([]);g.fillStyle=C+'aa';g.beginPath();g.arc(gx,sy(y),5,0,7);g.fill();g.fillStyle=O+'aa';g.beginPath();g.arc(gx+P.vx*s*u,sy(y),5,0,7);g.fill()}
+ const y=P.hh-.5*9.81*t*t;ball(g,gx,sy(y),C);ball(g,gx+P.vx*t*u,sy(y),O);txt(g,'bırakılan',gx+11,sy(P.hh)-12,C);txt(g,'fırlatılan →',gx+90,sy(P.hh)-12,O);
+ $('#r1t').textContent=fmt(T,2)+' s';$('#r1x').textContent=fmt(P.vx*T,1)+' m'});
+function line(g,a,b,c,d,col,w=1){g.strokeStyle=col;g.lineWidth=w;g.beginPath();g.moveTo(a,b);g.lineTo(c,d);g.stroke()}
+$('#p1').onclick=()=>{s1.t=0;s1.on=true;$('#p1').textContent='Düşüyor…'};
+document.addEventListener('chg',e=>{if(e.detail==='vx'||e.detail==='hh'){s1.on=false;s1.t=0;$('#p1').textContent='▶ Bırak'}});
+
+// 2 eğik atış
+const traj=()=>{const g0=+$('#pl').value,v=P.v0,a=P.th*D,vx=v*Math.cos(a),vy=v*Math.sin(a),T=(vy+Math.sqrt(vy*vy+2*g0*P.h0))/g0,R=vx*T,H=P.h0+vy*vy/(2*g0);return{g0,vx,vy,T,R,H,h:P.h0}};
+const s2=sim({t:0,slow:false,ghost:[],step(dt){const q=traj();this.t+=dt*(this.slow?.3:1);if(this.t>=q.T){this.t=q.T;this.on=false;$('#p2').textContent='▶ Yeniden fırlat'}v2.draw();vg.draw()}});
+const v2=view('#c2c',(g,w,h)=>{const q=traj(),t=s2.t,all=[q,...s2.ghost],Xm=Math.max(...all.map(a=>a.R),10)*1.08,Ym=Math.max(...all.map(a=>a.H),5)*1.14,ML=58,MB=46,u=Math.min((w-ML-20)/Xm,(h-MB-18)/Ym),sx=x=>ML+x*u,sy=y=>h-MB-y*u;
+ const d=nice(Math.max((w-ML)/u,1),w<520?4:8);g.lineWidth=1;txt(g,'',0,0);
+ for(let x=0;sx(x)<w;x+=d){line(g,sx(x),18,sx(x),sy(0),'#ffffff0d');txt(g,fmt(x,0),sx(x),sy(0)+28,SO,'center')}
+ for(let y=d;sy(y)>10;y+=d){line(g,ML,sy(y),w,sy(y),'#ffffff0d');txt(g,fmt(y,0),ML-22,sy(y),SO,'right')}
+ line(g,ML,sy(0),w,sy(0),'#ffffff66',1.5);line(g,ML,12,ML,sy(0),'#ffffff66',1.5);txt(g,'x (m)',w-44,sy(0)-11);txt(g,'y (m)',ML+6,18);
+ s2.ghost.forEach(a=>{const pts=[];for(let i=0;i<=60;i++){const s=i/60*a.T;pts.push([sx(a.vx*s),sy(a.h+a.vy*s-.5*a.g0*s*s)])}g.strokeStyle='#ffffff2e';g.lineWidth=1.5;g.setLineDash([3,5]);g.beginPath();pts.forEach(([x,y],i)=>i?g.lineTo(x,y):g.moveTo(x,y));g.stroke();g.setLineDash([])});
+ const Y=s=>q.h+q.vy*s-.5*q.g0*s*s,X=s=>q.vx*s;
+ const fut=[];for(let i=0;i<=80;i++){const s=i/80*q.T;fut.push([sx(X(s)),sy(Y(s))])}g.strokeStyle='#ffb34740';g.lineWidth=1.5;g.setLineDash([4,6]);g.beginPath();fut.forEach(([x,y],i)=>i?g.lineTo(x,y):g.moveTo(x,y));g.stroke();g.setLineDash([]);
+ const pts=[];for(let i=0;i<=80;i++){const s=i/80*t;pts.push([sx(X(s)),sy(Y(s))])}glowLine(g,pts,O,3);
+ const dt=q.T/12;for(let i=0;i<=12&&i*dt<=t+1e-9;i++){const s=i*dt;g.fillStyle=C;g.fillRect(sx(X(s))-1.5,sy(0)-6,3,12);g.fillStyle=M;g.fillRect(ML-6,sy(Y(s))-1.5,12,3);g.fillStyle=O+'cc';g.beginPath();g.arc(sx(X(s)),sy(Y(s)),3.5,0,7);g.fill()}
+ const x=sx(X(t)),y=sy(Y(t)),vy=q.vy-q.g0*t,k=Math.min(2.6,70/Math.max(1,P.v0)*1.4);
+ g.strokeStyle='#ffffff25';g.setLineDash([3,5]);g.lineWidth=1;g.beginPath();g.moveTo(x,y);g.lineTo(x,sy(0));g.moveTo(x,y);g.lineTo(ML,y);g.stroke();g.setLineDash([]);
+ ball(g,x,sy(0),C,5);ball(g,ML,y,M,5);
+ arrow(g,x,y,x+q.vx*k,y,C,3,'vₓ');arrow(g,x,y,x,y-vy*k,M,3,'vᵧ');arrow(g,x,y,x+q.vx*k,y-vy*k,O,3);ball(g,x,y,'#fff',7);
+ $('#r2T').textContent=fmt(q.T,2)+' s';$('#r2R').textContent=fmt(q.R,1)+' m';$('#r2H').textContent=fmt(q.H,1)+' m';$('#r2t').textContent=fmt(t,2)+' s';$('#r2x').textContent=fmt(q.vx,1);$('#r2y').textContent=fmt(vy,1);$('#r2v').textContent=fmt(Math.hypot(q.vx,vy),1)});
+const vg=view('#c2g',(g,w,h)=>{const q=traj(),t=s2.t,ML=58,sx=s=>ML+s/q.T*(w-ML-16),m=Math.max(P.v0,Math.abs(q.vy-q.g0*q.T),1),sy=v=>h/2-v/m*(h/2-16);
+ line(g,ML,sy(0),w-16,sy(0),'#ffffff44');txt(g,'v (m/s)',8,12);txt(g,fmt(m,0),ML-8,sy(m),SO,'right');txt(g,fmt(-m,0),ML-8,sy(-m),SO,'right');
+ line(g,sx(0),sy(q.vx),sx(q.T),sy(q.vx),C+'44',1.5);line(g,sx(0),sy(q.vy),sx(q.T),sy(q.vy-q.g0*q.T),M+'44',1.5);
+ glowLine(g,[[sx(0),sy(q.vx)],[sx(t),sy(q.vx)]],C);glowLine(g,[[sx(0),sy(q.vy)],[sx(t),sy(q.vy-q.g0*t)]],M);
+ line(g,sx(t),8,sx(t),h-8,'#ffffff55');txt(g,'vₓ düz: ivme yok',sx(q.T)-4,sy(q.vx)-10,C,'right');txt(g,'vᵧ eğimi = −g',sx(q.T)-4,sy(q.vy-q.g0*q.T)+(q.vy-q.g0*q.T<0?-10:10),M,'right')});
+$('#p2').onclick=()=>{const q=traj();if(s2.t>0){s2.ghost.unshift(s2.last||q);s2.ghost.length=Math.min(3,s2.ghost.length)}s2.last=q;s2.t=0;s2.on=true;$('#p2').textContent='Uçuyor…'};
+$('#slow').onclick=()=>{s2.slow=!s2.slow;$('#slow').textContent='Yavaş çekim: '+(s2.slow?'açık':'kapalı')};
+const res2=()=>{s2.t=Math.min(s2.t,traj().T);v2.draw();vg.draw()};$('#pl').onchange=res2;
+document.addEventListener('chg',e=>{if(['v0','th','h0'].includes(e.detail)){if(s2.on){s2.on=false;$('#p2').textContent='▶ Fırlat'}s2.t=Math.min(s2.t,traj().T);}});
+
+// 3 menzil
+view('#c3c',(g,w,h)=>{const V=P.v3,gg=9.81,Rm=V*V/gg,Hm=V*V/(2*gg),u=Math.min((w-60)/(Rm*1.05),(h-50)/(Hm*1.05)),x0=(w-Rm*u)/2,y0=h-30,tr=(th,c,wd,glow)=>{const a=th*D,pts=[];const T=2*V*Math.sin(a)/gg;for(let i=0;i<=70;i++){const s=i/70*T;pts.push([x0+V*Math.cos(a)*s*u,y0-(V*Math.sin(a)*s-.5*gg*s*s)*u])}if(glow)glowLine(g,pts,c,wd);else{g.strokeStyle=c;g.lineWidth=wd;g.beginPath();pts.forEach(([x,y],i)=>i?g.lineTo(x,y):g.moveTo(x,y));g.stroke()}};
+ line(g,0,y0,w,y0,'#ffffff55',1.5);for(const a of[15,30,45,60,75])tr(a,'#ffffff1c',1.5);tr(45,'#b8ff5c66',2);
+ const t=P.t3,c=90-t;tr(c,C,3,true);tr(t,O,3,true);const R=Rm*Math.sin(2*t*D),X=x0+R*u;ball(g,X,y0,'#fff',6);txt(g,fmt(R,1)+' m',X,y0+14,T,'center','700 12px '+MONO);txt(g,'45°',x0+Rm*u,y0+14,L,'center');
+ $('#l3a').firstChild.textContent=`${t}° menzili`;$('#l3b').firstChild.textContent=`${c}° menzili`;$('#r3a').textContent=fmt(R,1)+' m';$('#r3b').textContent=fmt(Rm*Math.sin(2*c*D),1)+' m';$('#r3m').textContent=fmt(Rm,1)+' m';$('#r3t').textContent=`${fmt(2*V*Math.sin(t*D)/gg,1)} / ${fmt(2*V*Math.sin(c*D)/gg,1)} s`});
+
+// 4 dairesel
+const s4=sim({on:true,ph:0,cut:null,step(dt){if(!inV('#c4c'))return;if(this.cut){this.cut.s+=dt;if(this.cut.s>3){this.cut=null}}else this.ph+=P.v4/P.r4*dt;v4.draw()}});
+const inV=id=>{const r=$(id).getBoundingClientRect();return r.bottom>0&&r.top<innerHeight};
+const v4=view('#c4c',(g,w,h)=>{const nar=w<640,W1=nar?w:w*.62,H1=nar?h*.6:h,cx=W1/2,cy=H1/2,Rp=Math.min(W1,H1)*.09+Math.min(W1,H1)*.033*P.r4,u=Rp/P.r4;
+ g.strokeStyle='#ffffff33';g.lineWidth=1.5;g.setLineDash([4,6]);g.beginPath();g.arc(cx,cy,Rp,0,7);g.stroke();g.setLineDash([]);g.fillStyle=T;g.beginPath();g.arc(cx,cy,3,0,7);g.fill();
+ const ph=s4.ph,vl=Math.min(90,P.v4*6),al=Math.min(Rp,10*Math.sqrt(P.v4*P.v4/P.r4));
+ if(s4.cut){const c=s4.cut,x=c.x+(-Math.sin(c.ph))*P.v4*c.s*u,y=c.y-(Math.cos(c.ph))*P.v4*c.s*u;g.strokeStyle=O;g.lineWidth=2;g.setLineDash([3,5]);g.beginPath();g.moveTo(c.x,c.y);g.lineTo(x,y);g.stroke();g.setLineDash([]);arrow(g,x,y,x-Math.sin(c.ph)*vl,y-Math.cos(c.ph)*vl,C,3,'v');ball(g,x,y,O,8);txt(g,'a = 0: düz gidiyor',cx,H1-16,L,'center')}
+ else{const x=cx+Rp*Math.cos(ph),y=cy-Rp*Math.sin(ph);line(g,cx,cy,x,y,'#ffffff55',1.5);arrow(g,x,y,x-Math.sin(ph)*vl,y-Math.cos(ph)*vl,C,3.5,'v');arrow(g,x,y,x-Math.cos(ph)*al,y+Math.sin(ph)*al,L,3.5,'a');ball(g,x,y,O,8)}
+ // hız paneli
+ const X0=nar?0:W1,Y0=nar?H1:0,W2=nar?w:w-W1,H2=nar?h-H1:h,hx=X0+W2/2,hy=Y0+H2/2+8,hr=Math.min(W2,H2)*.32;
+ g.fillStyle='#0d1020';g.fillRect(X0,Y0,W2,H2);line(g,X0,Y0,nar?w:X0,nar?Y0:h,LN);txt(g,'hız okları aynı noktadan',X0+12,Y0+15);
+ g.strokeStyle='#ffffff25';g.lineWidth=1.2;g.setLineDash([3,5]);g.beginPath();g.arc(hx,hy,hr,0,7);g.stroke();g.setLineDash([]);
+ const a1=ph+Math.PI/2,a2=a1+P.dp*D,x1=hx+hr*Math.cos(a1),y1=hy-hr*Math.sin(a1),x2=hx+hr*Math.cos(a2),y2=hy-hr*Math.sin(a2);
+ arrow(g,hx,hy,x1,y1,C,3,'v₁');arrow(g,hx,hy,x2,y2,'#4de8ff88',3,'v₂');arrow(g,x1,y1,x2,y2,L,3.5,'Δv');
+ $('#r4a').textContent=fmt(P.v4*P.v4/P.r4,1)+' m/s²';const Tp=2*Math.PI*P.r4/P.v4;$('#r4T').textContent=fmt(Tp,2)+' s';$('#r4f').textContent=fmt(1/Tp,2)+' Hz';$('#r4w').textContent=fmt(P.v4/P.r4,2)+' rad/s'});
+$('#cut').onclick=()=>{const c=$('#c4c').getBoundingClientRect(),nar=c.width<640,W1=nar?c.width:c.width*.62,H1=nar?c.height*.6:c.height,Rp=Math.min(W1,H1)*.09+Math.min(W1,H1)*.033*P.r4;s4.cut={ph:s4.ph,s:0,x:W1/2+Rp*Math.cos(s4.ph),y:H1/2-Rp*Math.sin(s4.ph)}};
+
+// 5 nehir
+const q5=()=>{const a=P.a5*D,vy=P.v5*Math.sin(a),vx=P.u5+P.v5*Math.cos(a),t=P.d5/vy;return{vx,vy,t,dr:vx*t}};
+const s5=sim({on:true,t:0,go:false,fl:0,step(dt){if(!inV('#c5c'))return;this.fl+=dt;if(this.go){this.t+=dt*3;const q=q5();if(this.t>=q.t){this.t=q.t;this.go=false;$('#p5').textContent='▶ Yeniden'}}v5.draw()}});
+const v5=view('#c5c',(g,w,h)=>{const q=q5(),lo=Math.min(0,q.dr),hi=Math.max(0,q.dr),span=Math.max(hi-lo,P.d5*.8)+30,u=Math.min((w-40)/span,(h-90)/P.d5),cx=w/2-(lo+hi)/2*u,by=h-45,ty=by-P.d5*u,sx=x=>cx+x*u,sy=y=>by-y*u;
+ g.fillStyle='#111a33';g.fillRect(0,ty,w,by-ty);g.fillStyle='#1a2013';g.fillRect(0,0,w,ty);g.fillRect(0,by,w,h-by);
+ g.strokeStyle='#4de8ff22';g.lineWidth=1.5;for(let r=0;r<7;r++){const yy=ty+(r+.5)/7*(by-ty);for(let i=0;i<7;i++){const X=((i/7*w+s5.fl*P.u5*u*1.2+r*57)%(w+60))-30;g.beginPath();g.moveTo(X,yy);g.lineTo(X+26,yy);g.stroke()}}
+ const X=q.vx*s5.t,Y=q.vy*s5.t;
+ g.strokeStyle='#ffb34755';g.lineWidth=1.5;g.setLineDash([4,6]);g.beginPath();g.moveTo(sx(0),sy(0));g.lineTo(sx(q.dr),sy(P.d5));g.stroke();g.setLineDash([]);glowLine(g,[[sx(0),sy(0)],[sx(X),sy(Y)]],O,3);
+ g.strokeStyle='#ffffff55';g.setLineDash([2,5]);g.lineWidth=1;g.beginPath();g.moveTo(sx(0),sy(0));g.lineTo(sx(0),sy(P.d5));g.stroke();g.setLineDash([]);
+ txt(g,fmt(P.d5,0)+' m',sx(0)+6,sy(P.d5/2));ball(g,sx(q.dr),sy(P.d5),L,5);
+ const bx=sx(X),byy=sy(Y),a=P.a5*D,k=11;
+ g.save();g.translate(bx,byy);g.rotate(-a);g.fillStyle='#f0ead6';g.beginPath();g.moveTo(17,0);g.quadraticCurveTo(0,-9,-13,-7);g.lineTo(-13,7);g.quadraticCurveTo(0,9,17,0);g.fill();g.restore();
+ arrow(g,bx,byy,bx+P.v5*Math.cos(a)*k,byy-P.v5*Math.sin(a)*k,T,3,'v');arrow(g,bx,byy,bx+P.u5*k,byy,C,3,P.u5?'u':'');arrow(g,bx,byy,bx+q.vx*k,byy-q.vy*k,O,3.5,'V');
+ $('#r5t').textContent=fmt(q.t,2)+' s';$('#r5d').textContent=fmt(q.dr,1)+' m';$('#r5v').textContent=fmt(Math.hypot(q.vx,q.vy),2)+' m/s'});
+$('#p5').onclick=()=>{s5.t=0;s5.go=true;$('#p5').textContent='Gidiyor…'};
+$('#st5').onclick=()=>{if(P.v5<=P.u5){$('#m5').textContent='v ≤ u iken mümkün değil: kayık akıntıyı yenemez.';return}const a=Math.round(Math.acos(-P.u5/P.v5)/D);P.a5=a;$('#s_a5').value=a;$('#o_a5').textContent=a+' °';window.refreshSliders&&refreshSliders();$('#m5').textContent=`cos θ = −u/v → θ ≈ ${a}°`;s5.t=0;v5.draw()};
+document.addEventListener('chg',e=>{if(['d5','u5','v5','a5'].includes(e.detail)){s5.t=0;s5.go=false;$('#p5').textContent='▶ Yola çık (3× hızlı)'}});
+
+// 6 oyun
+const GM={lv:1,pts:0,left:3,tg:null,wall:null,fly:null,tr:[],old:[]};
+const ri=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+function nextT(){const lv=GM.lv;GM.tg={x:ri(40,110),y:lv<2?0:ri(0,lv*7),w:lv<4?9:7};GM.wall=lv>=3?{x:GM.tg.x-ri(10,18),h:ri(12,22)}:null;GM.left=3;GM.old=[];GM.tr=[];GM.fly=null;$('#gMsg').textContent=`Hedef merkezi: x = ${GM.tg.x} m, y = ${GM.tg.y} m`+(GM.wall?` · Duvar: x = ${GM.wall.x} m, yükseklik ${GM.wall.h} m`:'');sc();vG.draw()}
+function sc(){$('#gS').textContent=`Hedef ${GM.lv}/5 · Kalan atış ${GM.left} · Puan ${GM.pts}`}
+const s6=sim({step(dt){const F=GM.fly;if(!F)return;let k=Math.ceil(dt*1.6/.004);for(let i=0;i<k;i++){const px=F.x,py=F.y;F.t+=.004;F.x=F.vx*F.t;F.y=F.vy*F.t-.5*9.81*F.t*F.t;const W=GM.wall,Tg=GM.tg;
+ if(W&&px<W.x&&F.x>=W.x&&F.y<W.h)return end('wall');
+ if(py>Tg.y&&F.y<=Tg.y&&F.vy-9.81*F.t<0){if(Math.abs(F.x-Tg.x)<=Tg.w/2)return end('hit');if(Tg.y>0)F.passed=F.passed??F.x}
+ if(F.y<0)return end('ground');if(F.x>150)return end('far')}
+ GM.tr.push([F.x,F.y]);vG.draw()}});
+function end(kind){const F=GM.fly;GM.tr.push([F.x,Math.max(0,F.y)]);GM.old.push(GM.tr);GM.fly=null;s6.on=false;const Tg=GM.tg;const px=F.passed??F.x;GM.left--;
+ if(kind==='hit'){const p=GM.left+1;GM.pts+=p;$('#gMsg').textContent=`İsabet! +${p} puan.`;setTimeout(adv,1100)}
+ else{const diff=px-Tg.x,why=kind==='wall'?'Duvara çarptın: daha dik at.':`Hedefin ${fmt(Math.abs(diff),1)} m ${diff<0?'gerisine':'ilerisine'} indi.`;if(GM.left<=0){$('#gMsg').textContent=why+' Atış hakkın bitti, sıradaki hedef.';setTimeout(adv,1500)}else $('#gMsg').textContent=why}
+ sc();vG.draw()}
+function adv(){if(GM.lv>=5){$('#gMsg').textContent=`Oyun bitti, puanın ${GM.pts}/15. “Ateş” ile yeni oyun başlar.`;GM.lv=6;return}GM.lv++;nextT()}
+const vG=view('#gc',(g,w,h)=>{const u=Math.min((w-50)/125,(h-46)/62),sx=x=>36+x*u,sy=y=>h-30-y*u;
+ for(let x=0;x<=120;x+=20){line(g,sx(x),12,sx(x),sy(0),'#ffffff0d');txt(g,fmt(x,0),sx(x),sy(0)+15,SO,'center')}for(let y=20;y<=60;y+=20){line(g,sx(0),sy(y),w,sy(y),'#ffffff0d');txt(g,fmt(y,0),sx(0)-6,sy(y),SO,'right')}
+ line(g,0,sy(0),w,sy(0),'#ffffff66',1.5);
+ if(GM.wall){g.fillStyle='#ff5fa2';g.fillRect(sx(GM.wall.x)-3,sy(GM.wall.h),6,GM.wall.h*u)}
+ const Tg=GM.tg;if(Tg){g.fillStyle='#b8ff5c';g.fillRect(sx(Tg.x-Tg.w/2),sy(Tg.y)-2,Tg.w*u,5);if(Tg.y>0){g.fillStyle='#b8ff5c33';g.fillRect(sx(Tg.x)-1.5,sy(Tg.y),3,Tg.y*u)}g.save();g.shadowColor=L;g.shadowBlur=20;g.strokeStyle=L;g.lineWidth=2;g.beginPath();g.arc(sx(Tg.x),sy(Tg.y)-11,6,0,7);g.stroke();g.restore()}
+ GM.old.forEach(t=>{g.strokeStyle='#ffffff33';g.lineWidth=1.5;g.beginPath();t.forEach(([x,y],i)=>i?g.lineTo(sx(x),sy(y)):g.moveTo(sx(x),sy(y)));g.stroke()});
+ if(GM.fly){glowLine(g,GM.tr.map(([x,y])=>[sx(x),sy(y)]),O,3);ball(g,sx(GM.fly.x),sy(GM.fly.y),O,6)}
+ const a=P.ga*D,L0=20+P.gv*.9;arrow(g,sx(0),sy(0),sx(0)+Math.cos(a)*L0,sy(0)-Math.sin(a)*L0,O,4)});
+$('#gF').onclick=()=>{if(GM.fly)return;if(GM.lv>5){GM.lv=1;GM.pts=0;nextT();return}if(GM.left<=0)return;const a=P.ga*D;GM.tr=[[0,0]];GM.fly={t:0,x:0,y:0,vx:P.gv*Math.cos(a),vy:P.gv*Math.sin(a)};s6.on=true};
+nextT();
+
+// test
+const Q=[
+['Yatay atılan top ile serbest bırakılan top aynı yükseklikten aynı anda çıkıyor. Hangisi önce düşer?',['Serbest bırakılan','Yatay atılan','Aynı anda','Topun kütlesine bağlı'],2,'Düşey hareket ikisinde de aynı: v₀ᵧ = 0 ve ivme g.'],
+['Eğik atışta (hava yok) hangisi uçuş boyunca sabittir?',['vᵧ','Yatay hız vₓ','Yükseklik','|v|'],1,'Yatayda kuvvet olmadığı için vₓ değişmez.'],
+['Aynı v₀ ile 20° ve 70° açılarla atılan toplar için ne doğrudur?',['Menzilleri eşit','Tepe yükseklikleri eşit','Uçuş süreleri eşit','Hiçbiri eşit değil'],0,'Tümler açılarda sin 2θ aynıdır, menziller eşit olur. 70° daha yüksek çıkar ve daha uzun kalır.'],
+['v₀ = 20 m/s, θ = 30°, g = 10 m/s². Tepeye çıkış süresi kaçtır?',['2 s','1,73 s','1 s','4 s'],2,'v₀ᵧ = 20·sin 30° = 10 m/s. t = 10/10 = 1 s.'],
+['Düzgün dairesel harekette ivmenin yönü neresidir?',['Hızla aynı yönde','Merkeze doğru','Merkezden dışarı','İvme yoktur'],1,'Hızın yönü sürekli değişir ve Δv merkeze bakar.'],
+['Hız iki katına çıkarsa (r sabit), merkezcil ivme kaç katına çıkar?',['2','√2','4','Değişmez'],2,'a = v²/r. Hız karesiyle girdiği için 4 kat olur.'],
+['Burnu tam karşıya bakan kayık 4 m/s, akıntı 3 m/s. Yere göre hızı kaçtır?',['7 m/s','1 m/s','5 m/s','3,5 m/s'],2,'Dik vektörler: √(4² + 3²) = 5 m/s.'],
+['Yağmur yatay giden otobüsün camında neden eğik görünür?',['Rüzgar eser','Yağmurun otobüse göre hızı eğiktir','Cam eğiktir','Yerçekimi değişir'],1,'Bağıl hız: v_yağmur/otobüs = v_yağmur − v_otobüs, yatay bir bileşen kazanır.']];
+let qR=0,qD=0;$('#quiz').innerHTML=Q.map(([q,o],i)=>`<div class="q" data-i="${i}"><h3>${i+1}. ${q}</h3><div class="o">${o.map(x=>`<button>${x}</button>`).join('')}</div></div>`).join('');
+$$('.q').forEach(c=>{const[, ,r,w]=Q[+c.dataset.i],bs=[...c.querySelectorAll('button')];bs.forEach((b,j)=>b.onclick=()=>{bs.forEach(x=>x.disabled=true);bs[r].classList.add('yes');if(j!==r)b.classList.add('no');else qR++;qD++;const p=document.createElement('p');p.className='why';p.textContent=w;c.append(p);$('#qs').textContent=`Doğru: ${qR} / ${qD}`})});
+
+new ResizeObserver(drawAll).observe(document.body);drawAll();if(document.fonts)document.fonts.ready.then(drawAll);
+</script>
+<script>window.X_DATA={hints:{"vx": "Topun yana doğru hızı. Düşme süresini değiştirip değiştirmediğine bak.", "hh": "Topların bırakıldığı yükseklik. Süreyi yalnızca bu değiştirir.", "v0": "Topun çıkış hızı.", "th": "Atış açısı. 0° yatay, 90° dik yukarı.", "h0": "Topun atıldığı noktanın yerden yüksekliği.", "t3": "Turuncu yörüngenin açısı. Mavi olan onun tümleyenidir (90° − θ).", "v3": "Çıkış hızı. Menzil hızın karesiyle büyür.", "r4": "Dairenin büyüklüğü. Büyüdükçe aynı hızda ivme azalır.", "v4": "Taşın sürati. İki katına çıkarsa ivme dört kat olur.", "dp": "İki hız okunun arasındaki açı. Küçülttükçe Δv tam merkeze bakar.", "d5": "Nehrin iki kıyısı arasındaki mesafe.", "u5": "Suyun kıyıya göre hızı.", "v5": "Kayığın suya göre, kendi motoruyla kazandığı hız.", "a5": "Kayığın burnunun yönü. 90° tam karşı kıyıya bakar.", "gv": "Atışın çıkış hızı.", "ga": "Atış açısı. Duvarlı seviyelerde daha dik at."},gens:(R,C,n)=>[
+ ()=>{const h=C([5,20,45,80,125,180]),t=Math.sqrt(2*h/10);return{q:`Bir top ${h} m yükseklikten serbest bırakılıyor. Kaç saniyede yere düşer?`,a:t,u:'s',s:[`t = √(2h/g)`,`t = √(2·${h}/10) = ${n(t)} s`]}},
+ ()=>{const h=C([5,20,45,80,125]),t=Math.sqrt(2*h/10),v=R(2,8)*5;return{q:`Bir top ${h} m yükseklikten ${v} m/s hızla yatay atılıyor. Kaç metre uzağa düşer?`,a:v*t,u:'m',s:[`Düşme süresi: t = √(2·${h}/10) = ${n(t)} s`,`x = ${v}·${n(t)} = ${n(v*t)} m`]}},
+ ()=>{const vy=R(2,8)*5,vx=R(2,6)*5;return{q:`Top v₀ₓ = ${vx} m/s, v₀ᵧ = ${vy} m/s ile yerden atılıyor. Toplam uçuş süresi kaç saniyedir?`,a:2*vy/10,u:'s',s:[`Tepeye çıkış: ${vy}/10 = ${n(vy/10)} s`,`Toplam: 2·${n(vy/10)} = ${n(vy/5)} s. vₓ süreyi etkilemez.`]}},
+ ()=>{const vy=R(2,8)*5,vx=R(2,6)*5;return{q:`Top v₀ₓ = ${vx} m/s, v₀ᵧ = ${vy} m/s ile yerden atılıyor. Menzil kaç metredir?`,a:vx*vy/5,u:'m',s:[`T = 2·${vy}/10 = ${n(vy/5)} s`,`R = ${vx}·${n(vy/5)} = ${n(vx*vy/5)} m`]}},
+ ()=>{const vy=R(2,8)*5;return{q:`Düşey hız bileşeni v₀ᵧ = ${vy} m/s olan top en fazla kaç metre yükselir?`,a:vy*vy/20,u:'m',s:[`H = v₀ᵧ²/(2g)`,`H = ${vy*vy}/20 = ${n(vy*vy/20)} m`]}},
+ ()=>{const v=R(2,12)*5,th=C([15,30,45]);const r=v*v*Math.sin(2*th*Math.PI/180)/10;return{q:`v₀ = ${v} m/s, θ = ${th}° ile yerden atılan topun menzili kaç metredir?`,a:r,u:'m',s:[`R = v₀²·sin 2θ / g`,`R = ${v*v}·sin ${2*th}° / 10 = ${n(r)} m`]}},
+ ()=>{const v=R(2,20),r=R(1,10);return{q:`${r} m yarıçaplı çemberde ${v} m/s süratle dönen cismin merkezcil ivmesi kaçtır?`,a:v*v/r,u:'m/s²',s:[`a_c = v²/r`,`a_c = ${v*v}/${r} = ${n(v*v/r)} m/s²`]}},
+ ()=>{const v=R(2,20),r=R(1,10),T=2*Math.PI*r/v;return{q:`${r} m yarıçaplı çemberde ${v} m/s süratle dönen cismin periyodu kaç saniyedir?`,a:T,u:'s',s:[`T = 2πr/v`,`T = 2π·${r}/${v} = ${n(T)} s`]}},
+ ()=>{const d=R(2,12)*10,v=C([2,4,5]),u=R(1,6);return{q:`${d} m genişliğindeki nehirde kayık burnunu tam karşıya tutuyor (v = ${v} m/s, akıntı ${u} m/s). Kaç metre sürüklenir?`,a:u*d/v,u:'m',s:[`t = d/v = ${d}/${v} = ${n(d/v)} s`,`Sürüklenme = u·t = ${u}·${n(d/v)} = ${n(u*d/v)} m`]}},
+ ()=>{const[v,u]=C([[4,3],[3,4],[8,6],[12,5],[5,12]]);return{q:`Burnu tam karşıya bakan kayık suya göre ${v} m/s gidiyor, akıntı ${u} m/s. Yere göre hızı kaçtır?`,a:Math.hypot(v,u),u:'m/s',s:[`Dik hızlar: V = √(${v}² + ${u}²)`,`V = ${Math.hypot(v,u)} m/s`]}}
+],example:{"q": "45 m yüksekliğindeki binanın tepesinden top 20 m/s hızla yatay atılıyor (g = 10 m/s²). Topun yere çarpma süresini, uzaklığını, çarpma hızını ve açısını bul.", "steps": [["Hareketi ikiye ayır. Yatayda ivme yoktur; düşeyde ilk hız sıfırdır.", "vₓ = 20 m/s (sabit) &nbsp; v₀ᵧ = 0"], ["Süreyi yalnızca düşey hareket belirler.", "45 = ½·10·t² → t² = 9 → t = 3 s"], ["Yatay mesafe, sabit hız çarpı süredir.", "x = 20·3 = 60 m"], ["Çarpma anındaki düşey hızı bul. Yatay hız değişmemiştir.", "vᵧ = g·t = 10·3 = 30 m/s (aşağı)"], ["Bileşenleri birleştirip çarpma hızını bul.", "|v| = √(20² + 30²) = √1300 ≈ 36,06 m/s"], ["Açı, yatayın altında ölçülür.", "θ = tan⁻¹(30/20) ≈ 56,3°"]]},cards:[["Bağımsızlık ilkesi", "Yatay ve düşey hareket birbirini etkilemez. Ortak olan tek şey zamandır."], ["Eğik atışta ivme", "Her an g'dir ve aşağı yöndedir. Yörüngenin tepesinde de aynıdır."], ["Tepe noktası", "vᵧ = 0, ama vₓ devam eder. Hız sıfır değildir."], ["Menzil", "R = v₀² sin 2θ / g. Aynı seviyeye dönüşte geçerlidir."], ["En uzak atış", "Aynı seviyeye dönüşte 45°. Yüksekten atarken daha küçük bir açı."], ["Tümler açılar", "θ ve 90°−θ aynı menzile düşer. Büyük açı daha yüksek ve uzun uçar."], ["Merkezcil ivme", "a_c = v²/r. Yönü her an merkeze doğrudur."], ["Periyot", "Bir tam turun süresi: T = 2πr/v. Frekans f = 1/T."], ["Açısal hız", "ω = v/r = 2π/T. Birimi rad/s."], ["Bağıl hız", "v_A/C = v_A/B + v_B/C. Hızlar referansa göre vektörel toplanır."]]};
+(function(){
+const D=window.X_DATA,$a=s=>[...document.querySelectorAll(s)],q=s=>document.querySelector(s);
+const nf=(x,st)=>{const d=st>=1?0:st>=.1&&Math.abs(st*10-Math.round(st*10))<1e-9?1:2;return x.toFixed(d).replace('.',',').replace('-','−')};
+function fill(i){const mn=+i.min,mx=+i.max,p=x=>(x-mn)/(mx-mn)*100,v=+i.value,o=mn<0&&mx>0?0:mn,a=Math.min(p(o),p(v)),b=Math.max(p(o),p(v));i.style.setProperty('--a',a+'%');i.style.setProperty('--b',b+'%')}
+window.refreshSliders=()=>$a('input.sl').forEach(fill);
+$a('[data-s]').forEach(e=>{const[id,,mn,mx,st,,u]=e.dataset.s.split('|'),i=e.querySelector('input');if(!i)return;i.classList.add('sl');
+ const row=document.createElement('div');row.className='slrow';const mk=(t,s,l)=>{const b=document.createElement('button');b.type='button';b.textContent=t;b.setAttribute('aria-label',l);let tm;const go=()=>{const nv=Math.max(+mn,Math.min(+mx,+i.value+s*(+st)));i.value=nv;i.dispatchEvent(new Event('input',{bubbles:true}))};
+  b.addEventListener('click',ev=>{if(ev.detail===0)go()});b.addEventListener('pointerdown',ev=>{ev.preventDefault();go();tm=setTimeout(function r(){go();tm=setTimeout(r,70)},380)});['pointerup','pointerleave','pointercancel'].forEach(n=>b.addEventListener(n,()=>clearTimeout(tm)));return b};
+ i.replaceWith(row);row.append(mk('−',-1,'Azalt'),i,mk('+',1,'Artır'));
+ const sc=document.createElement('div');sc.className='slscale';sc.innerHTML=`<span class="mn">${nf(+mn,+st)}${u?' '+u:''}</span>${+mn<0&&+mx>0?`<span class="zr" style="left:${-mn/(mx-mn)*100}%">0</span>`:''}<span class="mx">${nf(+mx,+st)}${u?' '+u:''}</span>`;row.after(sc);
+ const h=D.hints[id];if(h){const p=document.createElement('p');p.className='slhint';p.textContent=h;sc.after(p)}
+ i.addEventListener('input',()=>fill(i));fill(i)});
+$a('.ctl').forEach(c=>{const d=document.createElement('div');d.className='slcap';d.textContent='Ayarlar: çubuğu sürükle ya da − / + düğmesine bas. Sonuç anında değişir.';c.prepend(d)});
+
+// soru makinesi
+const R=(a,b)=>a+Math.floor(Math.random()*(b-a+1)),C=a=>a[R(0,a.length-1)],n=x=>String(Math.round(x*100)/100).replace('.',',').replace('-','−');
+const gens=D.gens(R,C,n);let cur,seen=0,good=0,run=0,answered=false,lastG=-1;
+function next(){let k;do{k=R(0,gens.length-1)}while(k===lastG&&gens.length>1);lastG=k;cur=gens[k]();answered=false;q('#xmq').textContent=cur.q;q('#xmu').textContent=cur.u||'';const i=q('#xmi');i.value='';q('#xmr').textContent='';q('#xmr').className='xres';q('#xms').innerHTML='';q('#xmc').textContent='Kontrol et'}
+function stat(){q('#xm1').textContent=good+' / '+seen;q('#xm2').textContent=run}
+function show(){q('#xms').innerHTML=cur.s.map(x=>`<li>${x}</li>`).join('')}
+q('#xmc').onclick=()=>{if(answered)return next();const v=parseFloat(q('#xmi').value.replace(',','.').replace('−','-')),r=q('#xmr');if(isNaN(v)){r.textContent='Önce sayısal bir cevap yaz.';r.className='xres bad';return}
+ const ok=Math.abs(v-cur.a)<=Math.max(cur.t||0,Math.abs(cur.a)*.01,.011);seen++;answered=true;if(ok){good++;run++;r.textContent='Doğru!';r.className='xres ok'}else{run=0;r.textContent='Doğru cevap: '+n(cur.a)+(cur.u?' '+cur.u:'');r.className='xres bad'}show();stat();q('#xmc').textContent='Yeni soru →'};
+q('#xmn').onclick=()=>{if(answered)next();else{show();q('#xmr').textContent='Doğru cevap: '+n(cur.a)+(cur.u?' '+cur.u:'');q('#xmr').className='xres';answered=true;q('#xmc').textContent='Yeni soru →'}};
+q('#xmi').addEventListener('keydown',e=>{if(e.key==='Enter')q('#xmc').click()});
+next();stat();
+
+// çözümlü örnek
+const ex=D.example;q('#xeq').textContent=ex.q;let si=0;const ol=q('#xel'),nb=q('#xen');
+function step(){if(si>=ex.steps.length){si=0;ol.innerHTML='';nb.textContent='İlk adımı göster';return}const[t,c]=ex.steps[si++],li=document.createElement('li');li.innerHTML=`<i>${si}.</i><div>${t}<code>${c}</code></div>`;ol.append(li);nb.textContent=si>=ex.steps.length?'Baştan başla':'Sonraki adım →'}
+nb.onclick=step;nb.textContent='İlk adımı göster';
+
+// kartlar
+q('#xcs').innerHTML=D.cards.map(([a,b])=>`<button class="xc" type="button" aria-label="${a}: kartı çevir"><span class="xci"><span class="xf"><b>${a}</b><small>Çevirmek için dokun</small></span><span class="xf bk"><span>${b}</span><small>${a}</small></span></span></button>`).join('');
+$a('.xc').forEach(c=>c.onclick=()=>c.classList.toggle('fl'));
+if(typeof drawAll==='function'){drawAll();requestAnimationFrame(drawAll)}
+})();
+</script>
+</body>
+</html>

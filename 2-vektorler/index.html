@@ -1,0 +1,400 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Yönü Olan Sayılar</title>
+<meta name="description" content="Vektörleri sürükleyerek öğreten etkileşimli ders: bileşenler, toplama, çıkarma, skaler ve vektörel çarpım.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%230b2cc4'/%3E%3Cpath d='M6 26 24 8M14 8h10v10' fill='none' stroke='%23ffdf3d' stroke-width='3.5'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0b2cc4;--deep:#08208f;--w:#fff;--soft:#c7d2ff;--a:#ffdf3d;--b:#6ff2c8;--r:#ff8a66;--mono:"JetBrains Mono",Consolas,monospace}
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{margin:0;color:var(--w);font:400 18px/1.55 "Space Grotesk",system-ui,sans-serif;background-color:var(--bg);background-image:linear-gradient(#ffffff12 1px,transparent 1px),linear-gradient(90deg,#ffffff12 1px,transparent 1px),linear-gradient(#ffffff08 1px,transparent 1px),linear-gradient(90deg,#ffffff08 1px,transparent 1px);background-size:120px 120px,120px 120px,24px 24px,24px 24px;overflow-x:hidden}
+canvas{display:block;width:100%}
+.w{max-width:1280px;margin:auto;padding:0 28px}
+.hero{height:100vh;min-height:620px;position:relative;overflow:hidden;border-bottom:2px solid var(--w)}
+.hero canvas{position:absolute;inset:0;height:100%}
+.heroT{position:absolute;left:0;right:0;bottom:0;pointer-events:none}
+.heroT a{pointer-events:auto}
+h1{font:700 clamp(58px,12vw,176px)/.88 "Space Grotesk",sans-serif;letter-spacing:-.05em;margin:0 0 20px}
+h1 span{color:var(--a)}
+.sub{max-width:31em;font-size:clamp(19px,2vw,24px);line-height:1.3;margin:0 0 26px}
+.toc{display:flex;flex-wrap:wrap;gap:0;border-top:2px solid var(--w);font:400 12px var(--mono)}
+.toc a{flex:1 1 auto;color:var(--w);text-decoration:none;padding:11px 12px;border-right:1px solid #ffffff55;white-space:nowrap}.toc a:hover{background:var(--a);color:#111}
+.stamp{position:absolute;top:22px;right:28px;border:2px solid var(--w);font:400 11px/1.4 var(--mono);background:var(--bg);pointer-events:none}
+.stamp div{padding:5px 10px;border-bottom:1px solid #ffffff66}.stamp div:last-child{border:0}
+.mark{position:absolute;top:22px;left:28px;font:700 13px var(--mono);pointer-events:none}
+.sheet{padding-top:80px;padding-bottom:20px}
+.grid{display:grid;grid-template-columns:minmax(0,7fr) minmax(0,5fr);gap:44px;align-items:start}
+.tag{font:400 12px var(--mono);border:1px solid var(--w);display:inline-block;padding:3px 9px;margin-bottom:14px}
+h2{font:700 clamp(32px,4.4vw,56px)/1.02 "Space Grotesk";letter-spacing:-.03em;margin:0 0 18px}
+p{margin:0 0 14px}
+.warn{border:2px dashed var(--a);padding:12px 14px;margin:16px 0}
+.warn b{color:var(--a)}
+.eq{font:700 18px/1.6 var(--mono);color:var(--a);margin:14px 0;overflow-wrap:anywhere}
+.inst{border:2px solid var(--w);background:var(--deep);min-width:0;box-shadow:12px 12px 0 #00000033}
+.inst canvas{touch-action:none;cursor:grab}
+.inst canvas:active{cursor:grabbing}
+.read{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));border-top:2px solid var(--w)}
+.read div{padding:9px 14px;font:400 12px var(--mono);color:var(--soft);border-right:1px solid #ffffff44}
+.read b{display:block;font:700 18px var(--mono);color:var(--w);white-space:nowrap}
+.ctl{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px 20px;padding:14px;border-top:2px solid var(--w)}
+.f label{display:flex;justify-content:space-between;font:400 13px var(--mono)}.f output{font-weight:700;color:var(--a)}
+input[type=range]{width:100%;accent-color:var(--a);margin:6px 0 0}
+button{font:700 13px var(--mono);padding:9px 13px;background:transparent;color:var(--w);border:2px solid var(--w);cursor:pointer}
+button:hover{background:var(--w);color:var(--bg)}button.on{background:var(--a);border-color:var(--a);color:#111}
+button:focus-visible,a:focus-visible,input:focus-visible,canvas:focus-visible{outline:3px solid var(--a);outline-offset:2px}
+.btns{display:flex;flex-wrap:wrap;gap:8px;padding:14px;border-top:2px solid var(--w)}
+.guess{border:2px solid var(--a);padding:16px;margin-bottom:16px;background:var(--deep)}
+.guess h3{font:700 12px var(--mono);color:var(--a);margin:0 0 8px}.guess p{font-size:20px;line-height:1.3}
+.o{display:flex;flex-wrap:wrap;gap:8px}.o button{font-weight:400}
+.yes,.yes:hover{background:var(--b)!important;border-color:var(--b)!important;color:#111!important}.no,.no:hover{background:var(--r)!important;border-color:var(--r)!important;color:#111!important}
+.after{display:none;margin-top:12px}.guess.done .after{display:block}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;padding:14px;border-top:2px solid var(--w)}
+.cards button{font:700 14px var(--mono);text-align:left;padding:13px}.cards button:disabled{opacity:.3;cursor:default}.cards button:disabled:hover{background:transparent;color:var(--w)}
+#gMsg{padding:12px 14px;font:400 14px var(--mono);border-top:2px solid var(--w);min-height:46px}
+.q{border-top:1px solid #ffffff66;padding:22px 0}.q h3{font:500 22px/1.25 "Space Grotesk";margin:0 0 12px}
+.q .o{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}.q button{text-align:left}.q button:disabled{cursor:default}.q .why{margin:12px 0 0;color:var(--soft)}
+#me{margin-top:70px;background:var(--a);color:#101010;padding:80px 0}
+#me .big{font:700 clamp(120px,22vw,300px)/.75 "Space Grotesk";letter-spacing:-.06em}
+#me h2{color:#101010}#me small{font:400 12px var(--mono);display:block;margin-top:20px}
+#me .grid{grid-template-columns:minmax(0,5fr) minmax(0,7fr);align-items:center}
+@media(max-width:880px){.grid,#me .grid{grid-template-columns:minmax(0,1fr);gap:24px}.txt{order:-1}.w{padding:0 16px}.sheet{padding-top:52px}.stamp{display:none}.inst{box-shadow:none}body{font-size:17px}}
+</style>
+
+<style id="x-style">
+.ctl{grid-template-columns:repeat(auto-fit,minmax(215px,1fr))!important}
+.slcap{grid-column:1/-1;font:600 13px/1.35 var(--x-body);color:var(--x-soft);display:flex;gap:8px;align-items:center}
+.slcap::before{content:"";width:10px;height:10px;background:var(--x-accent);border-radius:var(--x-dot);flex:none}
+.ctl .f label{font:700 14px/1.25 var(--x-body);color:inherit;align-items:baseline;margin-bottom:6px}
+.ctl .f label output{font:700 18px var(--mono);white-space:nowrap;color:inherit}
+.slrow{display:flex;align-items:center;gap:7px}
+.slrow button{flex:none;width:36px;height:36px;padding:0;font:700 20px/1 var(--mono);border-radius:var(--x-r);box-shadow:none!important;transform:none!important;touch-action:manipulation;user-select:none}
+input[type=range].sl{-webkit-appearance:none;appearance:none;flex:1;min-width:0;height:36px;margin:0;background:transparent;cursor:ew-resize;touch-action:none}
+.sl::-webkit-slider-runnable-track{height:12px;border-radius:var(--x-r);border:var(--x-track-bd);background:linear-gradient(to right,var(--x-rest) var(--a),var(--x-accent) var(--a),var(--x-accent) var(--b),var(--x-rest) var(--b))}
+.sl::-moz-range-track{height:12px;border-radius:var(--x-r);border:var(--x-track-bd);background:linear-gradient(to right,var(--x-rest) var(--a),var(--x-accent) var(--a),var(--x-accent) var(--b),var(--x-rest) var(--b))}
+.sl::-webkit-slider-thumb{-webkit-appearance:none;width:26px;height:26px;margin-top:-8px;border-radius:var(--x-dot);background:var(--x-thumb);border:3px solid var(--x-thumb-bd);box-shadow:0 2px 6px #0006;cursor:grab}
+.sl::-moz-range-thumb{width:20px;height:20px;border-radius:var(--x-dot);background:var(--x-thumb);border:3px solid var(--x-thumb-bd);box-shadow:0 2px 6px #0006;cursor:grab}
+.slscale{position:relative;height:16px;margin:0 43px;font:400 11px var(--mono);color:var(--x-soft)}
+.slscale span{position:absolute;top:0;white-space:nowrap}.slscale .mn{left:0}.slscale .mx{right:0}.slscale .zr{transform:translateX(-50%)}
+.slhint{margin:4px 0 0!important;font:400 13px/1.35 var(--x-body)!important;color:var(--x-soft)!important}
+.xs{padding-top:72px;padding-bottom:6px}
+.xs h2{margin-bottom:10px}
+.xlead{max-width:62ch;margin:0 0 18px;color:var(--x-soft)}
+.xbox{background:var(--x-card);color:var(--x-ink);border:var(--x-bd);border-radius:var(--x-rb);padding:22px;box-shadow:var(--x-sh)}
+.xm{display:grid;grid-template-columns:minmax(0,3fr) minmax(0,2fr);gap:26px}
+.xq{font:600 clamp(20px,2.2vw,26px)/1.3 var(--x-body);margin:0 0 16px}
+.xin{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.xin input{width:150px;padding:10px 12px;font:700 18px var(--mono);border:var(--x-bd);border-radius:var(--x-r);background:var(--x-field);color:var(--x-ink)}
+.xin span{font:700 15px var(--mono)}
+.xbox button{cursor:pointer}
+.xres{margin-top:14px;font:700 16px var(--x-body);min-height:24px}.xres.ok{color:var(--x-ok)}.xres.bad{color:var(--x-bad)}
+.xsteps{margin:10px 0 0;padding-left:22px;font:400 15px/1.65 var(--mono);overflow-wrap:anywhere}.xsteps li{margin-bottom:4px}
+.xstat{display:grid;grid-template-columns:1fr 1fr;gap:10px;align-content:start}
+.xstat div{border:var(--x-bd);border-radius:var(--x-r);padding:12px;font:400 12px var(--mono);color:var(--x-soft)}.xstat b{display:block;font:700 30px/1.1 var(--mono);color:var(--x-ink)}
+.xstat p{grid-column:1/-1;margin:4px 0 0;font:400 14px/1.45 var(--x-body);color:var(--x-soft)}
+.xex{font:600 clamp(18px,2vw,23px)/1.35 var(--x-body);margin:0 0 14px}
+.xdo{list-style:none;margin:0 0 14px;padding:0}.xdo li{padding:12px 0;border-top:1px solid var(--x-line);display:grid;grid-template-columns:32px minmax(0,1fr);gap:8px;font-size:16px}
+.xdo li>i{font:700 16px var(--mono);font-style:normal;color:var(--x-accent-t)}.xdo code{display:block;font:700 15px/1.6 var(--mono);margin-top:3px;white-space:normal}
+.xcards{display:grid;grid-template-columns:repeat(auto-fill,minmax(235px,1fr));gap:14px}
+.xc{perspective:900px;height:190px;padding:0!important;background:none!important;border:0!important;box-shadow:none!important;transform:none!important;color:var(--x-ink);text-align:left;font:inherit;cursor:pointer}
+.xci{position:relative;display:block;width:100%;height:100%;transition:transform .45s;transform-style:preserve-3d}
+.xc.fl .xci{transform:rotateY(180deg)}
+.xf{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:space-between;padding:16px;backface-visibility:hidden;-webkit-backface-visibility:hidden;border:var(--x-bd);border-radius:var(--x-rb);background:var(--x-card)}
+.xf b{font:700 21px/1.15 var(--x-body)}.xf small{font:400 11px var(--mono);color:var(--x-soft)}
+.xf.bk{transform:rotateY(180deg);background:var(--x-accent);color:var(--x-accent-ink);font:600 15px/1.4 var(--x-body);border-color:var(--x-accent)}
+.xf.bk small{color:inherit;opacity:.75}
+.xmail{display:inline-block;margin-top:6px;font:700 clamp(15px,1.8vw,20px) var(--mono);color:inherit;overflow-wrap:anywhere}
+@media(prefers-reduced-motion:reduce){.xci{transition:none}}
+@media(max-width:820px){.xm{grid-template-columns:minmax(0,1fr)}.xbox{padding:16px}.xcards{grid-template-columns:repeat(auto-fill,minmax(160px,1fr))}.xc{height:220px}.xf b{font-size:18px}.xf.bk{font-size:14px}}
+</style>
+<style>:root{--x-body:'Space Grotesk',system-ui,sans-serif;--x-card:#08208f;--x-ink:#fff;--x-soft:#c7d2ff;--x-line:#ffffff44;--x-accent:#ffdf3d;--x-accent-t:#ffdf3d;--x-accent-ink:#111;--x-rest:#ffffff2e;--x-thumb:#fff;--x-thumb-bd:#0b2cc4;--x-track-bd:0;--x-r:0;--x-rb:0;--x-dot:50%;--x-bd:2px solid #fff;--x-sh:12px 12px 0 #00000033;--x-field:#061a75;--x-ok:#6ff2c8;--x-bad:#ff8a66}</style>
+<style>.xlinks{margin:18px 0 0;display:flex;flex-wrap:wrap;gap:6px 16px;font:700 14px var(--mono)}.xlinks a{color:inherit;text-underline-offset:3px}.xlinks span{width:100%;font-weight:400}</style>
+</head>
+<body>
+<section class="hero" id="top">
+  <canvas id="hero" role="img" aria-label="İmleci takip eden büyük bir vektör"></canvas>
+  <div class="mark">FİZİK 1 · DERS 02 · VEKTÖRLER</div>
+  <div class="stamp"><div id="hA">|v| = 0</div><div id="hT">θ = 0°</div><div id="hC">v = 0î + 0ĵ</div></div>
+  <div class="heroT"><div class="w">
+    <h1>Yönü olan<br><span>sayılar</span></h1>
+    <p class="sub">Ok seni izliyor. Her konumda uzunluğu ve yönü başka: bir vektörü tanımlayan da tam olarak bu ikisi. İmleci gezdir ya da ekrana dokun.</p>
+  </div>
+  <nav class="toc" aria-label="Bölümler"><a href="#s1">01 Neden ok?</a><a href="#s2">02 Bileşenler</a><a href="#s3">03 Toplama</a><a href="#s4">04 Çıkarma</a><a href="#s5">05 Skaler çarpım</a><a href="#s6">06 Vektörel çarpım</a><a href="#s7">07 Oyun</a><a href="#s8">08 Test</a><a href="#xm">Soru makinesi</a><a href="#xe">Çözümlü örnek</a><a href="#xk">Bilgi kartları</a><a href="#me">Hakkımda</a></nav></div>
+</section>
+
+<section class="sheet w" id="s1"><div class="grid">
+  <div><div class="guess" data-guess><h3>ÖNCE TAHMİN ET</h3><p>3 km doğuya, sonra 4 km kuzeye yürüdün. Başladığın yere uzaklığın kaç km?</p><div class="o"><button>7 km</button><button>1 km</button><button data-ok>5 km</button></div>
+    <div class="after">3-4-5 üçgeni: <b>5 km</b>. 7 km yürüdün ama başlangıçtan 5 km uzaktasın. Aşağıda dönüş açısını değiştir, sonucun 1 ile 7 arasında gezindiğini gör.</div></div>
+  <div class="inst"><canvas id="c1" style="height:360px;cursor:default;touch-action:pan-y" role="img" aria-label="İki yürüyüş ayağı ve bileşke"></canvas>
+    <div class="ctl"><div class="f" data-s="t1|Dönüş açısı|0|180|1|90|°"></div></div>
+    <div class="read"><div>Yürünen yol<b>7,0 km</b></div><div>Bileşke |R|<b id="r1"></b></div></div></div></div>
+  <div class="txt"><span class="tag">PAFTA 01</span><h2>3 + 4 her zaman 7 etmez</h2>
+    <p>Kütle ya da sıcaklık gibi büyüklükleri düz toplarsın. Yer değiştirme, hız ve kuvvet ise bir yöne de sahiptir. Sonuç, okların birbirine göre nasıl durduğuna bağlıdır.</p>
+    <div class="eq">|R|² = A² + B² + 2AB·cos φ</div>
+    <p>Açı 0° ise oklar aynı yöndedir, 7 çıkar. Açı 180° ise zıttır, 1 çıkar. 90°'de Pisagor kalır.</p>
+    <p>Bir vektörün en önemli özelliği şudur: <b>aynı boy ve yöne sahip her ok aynı vektördür</b>, nereye çizdiğin önemli değildir. Bu yüzden okları kaydırıp uç uca ekleyebiliyoruz.</p></div>
+</div></section>
+
+<section class="sheet w" id="s2"><div class="grid">
+  <div class="inst"><canvas id="c2" style="height:500px" role="application" aria-label="Sürüklenebilir vektör ve bileşenleri"></canvas>
+    <div class="read"><div>Aₓ<b id="r2x"></b></div><div>Aᵧ<b id="r2y"></b></div><div>|A|<b id="r2m"></b></div><div>Gerçek θ<b id="r2t"></b></div><div>tan⁻¹(Aᵧ/Aₓ)<b id="r2q"></b></div></div></div>
+  <div class="txt"><span class="tag">PAFTA 02</span><h2>Bir ok, iki gölge</h2>
+    <p>Sarı okun ucunu sürükle. Tepeden tutulan lambanın x ekseninde bıraktığı gölge <b>Aₓ</b>, yandan tutulanın y ekseninde bıraktığı gölge <b>Aᵧ</b>'dir.</p>
+    <div class="eq">Aₓ = A·cos θ<br>Aᵧ = A·sin θ<br>A = √(Aₓ² + Aᵧ²)<br>A = Aₓ î + Aᵧ ĵ</div>
+    <p>î ve ĵ boyu 1 olan yön oklarıdır. Tek görevleri “x yönünde” ve “y yönünde” demektir.</p>
+    <div class="warn"><b>Sınavın klasik tuzağı:</b> Okun ucunu sol tarafa götür. Hesap makinesinin tan⁻¹ değeri gerçek açıyı vermez, çünkü makine II. ve III. bölgeyi ayırt edemez. <b id="w2"></b></div></div>
+</div></section>
+
+<section class="sheet w" id="s3"><div class="grid">
+  <div class="inst"><canvas id="c3" style="height:500px" role="application" aria-label="İki vektörün toplamı"></canvas>
+    <div class="read"><div>A<b id="r3a"></b></div><div>B<b id="r3b"></b></div><div>R = A + B<b id="r3r"></b></div><div>|R|<b id="r3m"></b></div></div>
+    <div class="btns"><button id="b3">▶ Sırayı değiştir: B + A</button></div></div>
+  <div class="txt"><span class="tag">PAFTA 03</span><h2>Toplama: uç uca ekle, ya da bileşen topla</h2>
+    <p>A'nın ucundan B'yi başlat. Başlangıçtan son uca çizilen ok bileşkedir. Düğmeye bas: sırayı değiştirince farklı bir yol izlersin ama aynı noktaya varırsın. İki yol birlikte bir paralelkenar oluşturur.</p>
+    <div class="eq">Rₓ = Aₓ + Bₓ<br>Rᵧ = Aᵧ + Bᵧ</div>
+    <p>Geometri fikri verir, bileşenler kesin sonucu. İki vektör toplarken <b>boyları değil bileşenleri</b> toplarsın; boylar yalnızca aynı yöndeyse doğrudan toplanır.</p></div>
+</div></section>
+
+<section class="sheet w" id="s4"><div class="grid">
+  <div class="inst"><canvas id="c4" style="height:500px" role="application" aria-label="Vektör çıkarma ve skalerle çarpma"></canvas>
+    <div class="ctl"><div class="f" data-s="k|k çarpanı (k·A modu)|-3|3|0.25|1.5|"></div></div>
+    <div class="btns"><button id="m4a" class="on">A − B</button><button id="m4b">k · A</button></div>
+    <div class="read"><div id="l4">A − B<b id="r4"></b></div><div>Boy<b id="r4m"></b></div></div></div>
+  <div class="txt"><span class="tag">PAFTA 04</span><h2>Çıkarma: B'nin ucundan A'nın ucuna</h2>
+    <p>A − B aslında A + (−B)'dir. −B, B'nin ters yöne çevrilmiş halidir. Sonuç okunun kısa bir yorumu var: <b>B'nin ucundan A'nın ucuna giden ok</b>.</p>
+    <div class="eq">A − B = A + (−B)<br>Δv = v_son − v_ilk</div>
+    <p>Bu işlem boşuna öğrenilmiyor. Hızın değişimi Δv böyle bulunur ve dairesel harekette ivmenin neden merkeze baktığı buradan çıkar.</p>
+    <p><b>k · A</b> modunda: k büyüklüğü boyu değiştirir, negatif k ise yönü ters çevirir. Vektörün doğrultusu ise aynı kalır.</p></div>
+</div></section>
+
+<section class="sheet w" id="s5"><div class="grid">
+  <div><div class="guess" data-guess><h3>ÖNCE TAHMİN ET</h3><p>Çantanı elinde tutarak düz yolda 50 m yürüyorsun. Çantayı taşıyan kuvvetin yaptığı iş kaç?</p><div class="o"><button>Çok fazla, yoruldum</button><button data-ok>Sıfır</button><button>Ağırlık × 50 m</button></div>
+    <div class="after">Kuvvet yukarı, yer değiştirme yatay. Aralarındaki açı 90° ve cos 90° = 0. Fizikte iş <b>F · d</b> olduğu için sonuç sıfırdır. Yorulmanın sebebi kaslarının içinde harcanan enerjidir. Aşağıda açıyı 90° yap.</div></div>
+  <div class="inst"><canvas id="c5" style="height:440px" role="application" aria-label="Skaler çarpım ve izdüşüm"></canvas>
+    <div class="read"><div>Açı φ<b id="r5t"></b></div><div>A · B<b id="r5d"></b></div><div>İzdüşüm<b id="r5p"></b></div></div></div></div>
+  <div class="txt"><span class="tag">PAFTA 05</span><h2>Skaler çarpım: ne kadar aynı yöne bakıyorlar?</h2>
+    <p>B'nin A üzerindeki gölgesini al, A'nın boyuyla çarp. Sonuç bir sayıdır, yönü yoktur.</p>
+    <div class="eq">A · B = A·B·cos φ<br>A · B = AₓBₓ + AᵧBᵧ</div>
+    <p>Aynı yöne bakıyorlarsa pozitif, dik iseler sıfır, zıt yönlere bakıyorlarsa negatiftir. İki formülün aynı sayıyı verdiğini oku sürükleyerek kontrol edebilirsin.</p>
+    <div class="warn"><b>Kullanışlı sonuç:</b> Skaler çarpım sıfırsa vektörler diktir. Açı hesaplamana gerek kalmaz.</div></div>
+</div></section>
+
+<section class="sheet w" id="s6"><div class="grid">
+  <div class="inst"><canvas id="c6" style="height:480px;cursor:default;touch-action:pan-y" role="img" aria-label="Üç boyutlu vektörel çarpım"></canvas>
+    <div class="ctl"><div class="f" data-s="ma|A|1|5|0.5|4|"></div><div class="f" data-s="mb|B|1|5|0.5|3|"></div><div class="f" data-s="ph|A'dan B'ye açı|-180|180|5|60|°"></div></div>
+    <div class="read"><div>C = A·B·sin φ<b id="r6"></b></div><div>C yönü<b id="r6d"></b></div></div></div>
+  <div class="txt"><span class="tag">PAFTA 06</span><h2>Vektörel çarpım: düzlemden dışarı çıkan ok</h2>
+    <p>İki vektörü çarpınca bu kez ikisine de dik yeni bir vektör çıkar. Boyu, iki okun kurduğu paralelkenarın alanıdır.</p>
+    <div class="eq">|A × B| = A·B·sin φ<br>î × ĵ = k̂<br>A × B = −(B × A)</div>
+    <p><b>Sağ el kuralı:</b> Sağ elinin dört parmağını A'dan B'ye doğru kıvır. Başparmağın C'nin yönünü gösterir. Açıyı negatif yap, ok ters döner: çarpımda sıra önemlidir.</p>
+    <p>Tork ve manyetik kuvvet bu çarpımla hesaplanır. Paralel oklarda sonuç sıfırdır, dik oklarda en büyüktür.</p></div>
+</div></section>
+
+<section class="sheet w" id="s7"><div class="grid">
+  <div class="inst"><canvas id="gc" style="height:480px;cursor:default;touch-action:pan-y" role="img" aria-label="Rota oyunu haritası"></canvas>
+    <div id="gMsg" aria-live="polite"></div>
+    <div class="cards" id="cards"></div>
+    <div class="btns"><button id="gU">↶ Geri al</button><button id="gN">Sonraki hedef →</button></div></div>
+  <div class="txt"><span class="tag">PAFTA 07</span><h2>Oyun: Rotayı kur</h2>
+    <p>Bayrağa ulaşmak için doğru kartları seç. Her kart bir yer değiştirme vektörüdür ve bir kez kullanılabilir. Kartlar uç uca eklenir.</p>
+    <p>Önce kafandan topla, sonra tıkla. Hedefin bileşenlerini kartların bileşenlerinin toplamı olarak düşün. 4. turdan itibaren bazı kartlar boy ve açıyla verilir; onları önce bileşene çevirmen gerekir.</p>
+    <div class="eq" id="gS"></div></div>
+</div></section>
+
+<section class="sheet w" id="s8"><div class="grid">
+  <div id="quiz"></div>
+  <div class="txt"><span class="tag">PAFTA 08</span><h2>Son kontrol</h2><p>Her sorudan sonra nedenini de görürsün.</p><div class="eq" id="qs"></div></div>
+</div></section>
+
+
+<section class="xs w" id="xm"><h2>Soru makinesi</h2><p class="xlead">Sayılar her seferinde değişir, soru hiç bitmez. Kâğıda çöz, cevabını yaz ve çözümü kontrol et. </p>
+<div class="xbox xm"><div><p class="xq" id="xmq"></p><div class="xin"><input id="xmi" inputmode="decimal" autocomplete="off" aria-label="Cevabın"><span id="xmu"></span><button class="go" id="xmc" type="button">Kontrol et</button><button id="xmn" type="button">Çözümü gör / geç</button></div><div class="xres" id="xmr" aria-live="polite"></div><ol class="xsteps" id="xms"></ol></div>
+<div class="xstat"><div>Doğru<b id="xm1">0 / 0</b></div><div>Seri<b id="xm2">0</b></div><p>Üst üste doğru yapabildiğin kadar devam et. Sınavdan önce 10'luk seri iyi bir hedef.</p></div></div></section>
+<section class="xs w" id="xe"><h2>Çözümlü örnek</h2><p class="xlead">Sınav tipi bir soru. Her adımdan önce durup kendin dene, sonra açıp karşılaştır.</p>
+<div class="xbox"><p class="xex" id="xeq"></p><ol class="xdo" id="xel"></ol><button class="go" id="xen" type="button"></button></div></section>
+<section class="xs w" id="xk"><h2>Bilgi kartları</h2><p class="xlead">Kavramı önce kendin tanımla, sonra kartı çevirip kontrol et.</p><div class="xcards" id="xcs"></div></section>
+<section id="me"><div class="w grid">
+  <div class="big">KK</div>
+  <div><h2>Hakkımda</h2><p>Ben Kadir Kara. Fizik 1 dersinde işlediğimiz her konu için bir etkileşimli çalışma hazırlıyorum; bu site onlardan biri.</p><p>Vektörleri bir tahtada görmek ile elinle sürüklemek çok farklı şeyler. Bu yüzden burada okların hepsini sen hareket ettiriyorsun ve her değişimin sonucunu anında görüyorsun.</p><p>Diğer projelerim için bana yazabilirsin:<br><a class="xmail" href="mailto:kadirkara1643@gmail.com">kadirkara1643@gmail.com</a></p><nav class="xlinks" aria-label="Diğer dersler"><span>Diğer dersler:</span><a href="../1-bir-boyutta-hareket/">Bir boyutta hareket</a><a href="../3-iki-boyutta-hareket/">İki boyutta hareket</a><a href="../4-hareket-yasalari/">Hareket yasaları</a><a href="../">Tüm dersler</a></nav><small>Fizik 1 · Ödev projesi</small></div>
+</div></section>
+
+<script>
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const W='#ffffff',A='#ffdf3d',B='#6ff2c8',R='#ff8a66',SOFT='#c7d2ff',MONO='"JetBrains Mono",monospace',D=Math.PI/180;
+const fmt=(n,d=1)=>{if(Math.abs(n)<.5*10**-d)n=0;return n.toFixed(d).replace('.',',').replace('-','−')};
+const vs=(x,y,d=0)=>`${fmt(x,d)}î ${y<0?'−':'+'} ${fmt(Math.abs(y),d)}ĵ`;
+const P={},views=[];
+$$('[data-s]').forEach(e=>{const[id,l,mn,mx,st,v,u]=e.dataset.s.split('|');P[id]=+v;const dg=st<1?(st<.5?2:1):0;e.innerHTML=`<label for="s_${id}">${l}<output id="o_${id}">${fmt(+v,dg)}${u}</output></label><input id="s_${id}" type="range" min="${mn}" max="${mx}" step="${st}" value="${v}">`;e.querySelector('input').oninput=ev=>{P[id]=+ev.target.value;$('#o_'+id).textContent=fmt(P[id],dg)+u;drawAll()}});
+function view(id,fn){const c=$(id),v={c,draw(){const r=c.getBoundingClientRect(),d=devicePixelRatio||1;if(!r.width)return;c.width=r.width*d;c.height=r.height*d;const g=c.getContext('2d');g.setTransform(d,0,0,d,0,0);g.lineCap='round';fn(g,r.width,r.height)}};views.push(v);return v}
+const drawAll=()=>views.forEach(v=>v.draw());
+function arrow(g,x1,y1,x2,y2,c,w=3,lab,dash){const a=Math.atan2(y2-y1,x2-x1),L=Math.hypot(x2-x1,y2-y1),h=Math.min(14,L*.5);g.strokeStyle=g.fillStyle=c;g.lineWidth=w;if(dash)g.setLineDash(dash);g.beginPath();g.moveTo(x1,y1);g.lineTo(x2-Math.cos(a)*h*.7,y2-Math.sin(a)*h*.7);g.stroke();g.setLineDash([]);if(L>2){g.beginPath();g.moveTo(x2,y2);g.lineTo(x2-h*Math.cos(a-.42),y2-h*Math.sin(a-.42));g.lineTo(x2-h*Math.cos(a+.42),y2-h*Math.sin(a+.42));g.fill()}if(lab){g.font='700 14px '+MONO;g.textAlign='center';g.textBaseline='middle';g.fillText(lab,x2+Math.cos(a)*16-Math.sin(a)*9,y2+Math.sin(a)*16+Math.cos(a)*9)}}
+function dash(g,x1,y1,x2,y2,c,w=1.5,d=[5,5]){g.strokeStyle=c;g.lineWidth=w;g.setLineDash(d);g.beginPath();g.moveTo(x1,y1);g.lineTo(x2,y2);g.stroke();g.setLineDash([])}
+function grid(g,w,h,range){const u=Math.min(w,h)/(2*range+1),cx=w/2,cy=h/2,sx=x=>cx+x*u,sy=y=>cy-y*u;
+ for(let i=-40;i<=40;i++){const X=sx(i),Y=sy(i);g.strokeStyle=i%5?'#ffffff14':'#ffffff30';g.lineWidth=1;if(X>=0&&X<=w){g.beginPath();g.moveTo(X,0);g.lineTo(X,h);g.stroke()}if(Y>=0&&Y<=h){g.beginPath();g.moveTo(0,Y);g.lineTo(w,Y);g.stroke()}}
+ g.strokeStyle='#ffffffb0';g.lineWidth=1.5;g.beginPath();g.moveTo(0,cy);g.lineTo(w,cy);g.moveTo(cx,0);g.lineTo(cx,h);g.stroke();
+ g.font='10px '+MONO;g.fillStyle=SOFT;g.textAlign='center';g.textBaseline='top';for(let i=-Math.floor(range/5)*5;i<=range;i+=5)if(i)g.fillText(fmt(i,0),sx(i),cy+4);g.textAlign='right';g.textBaseline='middle';for(let i=-Math.floor(range/5)*5;i<=range;i+=5)if(i)g.fillText(fmt(i,0),cx-4,sy(i));
+ return{u,sx,sy,cx,cy}}
+function handle(g,x,y,c){g.fillStyle=c;g.strokeStyle='#08208f';g.lineWidth=2;g.beginPath();g.arc(x,y,8,0,7);g.fill();g.stroke()}
+function dragPoints(canvas,pts,range,after){let cur=null;canvas.addEventListener('pointerdown',e=>{const r=canvas.getBoundingClientRect(),u=Math.min(r.width,r.height)/(2*range+1),mx=(e.clientX-r.left-r.width/2)/u,my=-(e.clientY-r.top-r.height/2)/u;let best=1e9;for(const k in pts){const d=Math.hypot(pts[k].x-mx,pts[k].y-my);if(d<best){best=d;cur=k}}canvas.setPointerCapture(e.pointerId);mv(e)});
+ const mv=e=>{if(!cur)return;const r=canvas.getBoundingClientRect(),u=Math.min(r.width,r.height)/(2*range+1);pts[cur].x=Math.max(-range,Math.min(range,Math.round((e.clientX-r.left-r.width/2)/u)));pts[cur].y=Math.max(-range,Math.min(range,Math.round(-(e.clientY-r.top-r.height/2)/u)));after()};canvas.addEventListener('pointermove',mv);canvas.addEventListener('pointerup',()=>cur=null);canvas.addEventListener('pointercancel',()=>cur=null)}
+$$('[data-guess]').forEach(b=>{const bs=[...b.querySelectorAll('.o button')];bs.forEach(x=>x.onclick=()=>{if(b.classList.contains('done'))return;b.classList.add('done');bs.find(y=>'ok'in y.dataset).classList.add('yes');if(!('ok'in x.dataset))x.classList.add('no');drawAll()})});
+
+// kahraman
+const st0=innerWidth<700?{x:.72,y:.14}:{x:.72,y:.3};let hp={...st0},tp={...st0};const heroC=$('#hero');
+const hv=view('#hero',(g,w,h)=>{const nar=w<700,ox=nar?w*.3:w*.62,oy=nar?h*.42:h*.56,mx=nar?Math.min(hp.x*w,w-14):hp.x*w,my=nar?Math.min(hp.y*h,h*.42+40):hp.y*h;
+ const sc=40;for(let i=-30;i<=30;i++){g.strokeStyle='#ffffff18';g.lineWidth=1;const X=ox+i*sc,Y=oy+i*sc;g.beginPath();g.moveTo(X,0);g.lineTo(X,h);g.moveTo(0,Y);g.lineTo(w,Y);g.stroke()}
+ g.strokeStyle='#ffffff70';g.lineWidth=1.5;g.beginPath();g.moveTo(0,oy);g.lineTo(w,oy);g.moveTo(ox,0);g.lineTo(ox,h);g.stroke();
+ dash(g,mx,my,mx,oy,'#ffffff99');dash(g,mx,my,ox,my,'#ffffff99');arrow(g,ox,oy,mx,oy,B,4);arrow(g,ox,oy,ox,my,R,4);arrow(g,ox,oy,mx,my,A,6);
+ const x=(mx-ox)/sc,y=(oy-my)/sc;let t=Math.atan2(y,x)/D;if(t<0)t+=360;
+ $('#hA').textContent='|v| = '+fmt(Math.hypot(x,y));$('#hT').textContent='θ = '+fmt(t,0)+'°';$('#hC').textContent='v = '+vs(x,y,1)});
+heroC.parentElement.addEventListener('pointermove',e=>{const r=heroC.getBoundingClientRect();tp={x:(e.clientX-r.left)/r.width,y:(e.clientY-r.top)/r.height}});
+heroC.parentElement.addEventListener('pointerdown',e=>{const r=heroC.getBoundingClientRect();tp={x:(e.clientX-r.left)/r.width,y:(e.clientY-r.top)/r.height}});
+(function lp(n){hp.x+=(tp.x-hp.x)*.14;hp.y+=(tp.y-hp.y)*.14;if(scrollY<innerHeight&&Math.hypot(tp.x-hp.x,tp.y-hp.y)>.0005)hv.draw();requestAnimationFrame(lp)})();
+
+// 1
+view('#c1',(g,w,h)=>{const u=Math.min(w/10.5,h/8.5),ang=P.t1*D,ox=w/2-(3+4*Math.cos(ang))*u/2,oy=h/2+4*Math.sin(ang)*u/2,ax=ox+3*u,ay=oy,bx=ax+4*u*Math.cos(ang),by=ay-4*u*Math.sin(ang);
+ dash(g,ax,ay,ax+70,ay,'#ffffff55');arrow(g,ox,oy,ax,ay,A,5,'3 km');arrow(g,ax,ay,bx,by,B,5,'4 km');arrow(g,ox,oy,bx,by,R,5,'R');
+ g.strokeStyle=W;g.lineWidth=1.5;g.beginPath();g.arc(ax,ay,26,-ang,0);g.stroke();if(P.t1>12){g.fillStyle=W;g.font='12px '+MONO;g.textAlign='left';g.fillText(P.t1+'°',ax+30,ay-12)}
+ $('#r1').textContent=fmt(Math.sqrt(25+24*Math.cos(ang)),2)+' km'});
+
+// 2
+const p2={a:{x:6,y:5}};
+const v2=view('#c2',(g,w,h)=>{const G=grid(g,w,h,10),{x,y}=p2.a,X=G.sx(x),Y=G.sy(y);
+ dash(g,X,Y,X,G.cy,'#ffffffaa');dash(g,X,Y,G.cx,Y,'#ffffffaa');
+ g.fillStyle='#6ff2c833';g.fillRect(Math.min(G.cx,X),G.cy-5,Math.abs(X-G.cx),10);g.fillStyle='#ff8a6633';g.fillRect(G.cx-5,Math.min(G.cy,Y),10,Math.abs(Y-G.cy));
+ arrow(g,G.cx,G.cy,X,G.cy,B,4,'Aₓ');arrow(g,G.cx,G.cy,G.cx,Y,R,4,'Aᵧ');arrow(g,G.cx,G.cy,X,Y,A,5,'A');
+ let t=Math.atan2(y,x)/D;if(t<0)t+=360;g.strokeStyle=W;g.lineWidth=2;g.beginPath();g.arc(G.cx,G.cy,30,0,-t*D,true);g.stroke();g.fillStyle=W;g.font='700 12px '+MONO;g.textAlign='left';g.fillText('θ',G.cx+Math.cos(t*D/2)*42,G.cy-Math.sin(t*D/2)*42);
+ handle(g,X,Y,A);const q=x===0?null:Math.atan(y/x)/D;
+ $('#r2x').textContent=fmt(x,0);$('#r2y').textContent=fmt(y,0);$('#r2m').textContent=fmt(Math.hypot(x,y),2);$('#r2t').textContent=fmt(t,1)+'°';$('#r2q').textContent=q===null?'tanımsız':fmt(q,1)+'°';
+ $('#w2').textContent=x<0?`Şu an makine ${fmt(q,1)}° diyor, doğrusu ${fmt(t,1)}°: 180° eklemelisin.`:'Şu an sağ tarafasın, makine doğru görünüyor.'});
+dragPoints($('#c2'),p2,10,()=>v2.draw());
+
+// 3
+const p3={a:{x:5,y:2},b:{x:2,y:5}};let sw=0,swT=0,swOn=false;
+const v3=view('#c3',(g,w,h)=>{const G=grid(g,w,h,12),a=p3.a,b=p3.b,r={x:a.x+b.x,y:a.y+b.y},sx=G.sx,sy=G.sy;
+ g.fillStyle='#ffffff10';g.beginPath();g.moveTo(sx(0),sy(0));g.lineTo(sx(a.x),sy(a.y));g.lineTo(sx(r.x),sy(r.y));g.lineTo(sx(b.x),sy(b.y));g.fill();
+ const f=sw;arrow(g,sx(a.x),sy(a.y),sx(r.x),sy(r.y),'#6ff2c8'+(f<.5?'ff':'44'),3,f<.5?'B':'');arrow(g,sx(b.x),sy(b.y),sx(r.x),sy(r.y),'#ffdf3d'+(f>=.5?'ff':'44'),3,f>=.5?'A':'');
+ arrow(g,sx(0),sy(0),sx(a.x),sy(a.y),A,4,f<.5?'A':'A');arrow(g,sx(0),sy(0),sx(b.x),sy(b.y),B,4,'B');arrow(g,sx(0),sy(0),sx(r.x),sy(r.y),R,5,'R');
+ if(swOn){const p=swT,fx=f<.5?(p<.5?a.x*p*2:a.x+b.x*(p-.5)*2):(p<.5?b.x*p*2:b.x+a.x*(p-.5)*2),fy=f<.5?(p<.5?a.y*p*2:a.y+b.y*(p-.5)*2):(p<.5?b.y*p*2:b.y+a.y*(p-.5)*2);g.fillStyle=W;g.beginPath();g.arc(sx(fx),sy(fy),8,0,7);g.fill()}
+ handle(g,sx(a.x),sy(a.y),A);handle(g,sx(b.x),sy(b.y),B);
+ $('#r3a').textContent=vs(a.x,a.y);$('#r3b').textContent=vs(b.x,b.y);$('#r3r').textContent=vs(r.x,r.y);$('#r3m').textContent=fmt(Math.hypot(r.x,r.y),2)});
+dragPoints($('#c3'),p3,12,()=>v3.draw());
+$('#b3').onclick=()=>{sw=sw<.5?1:0;$('#b3').textContent=sw?'▶ Sırayı değiştir: A + B':'▶ Sırayı değiştir: B + A';swOn=true;swT=0;const st=performance.now();(function f(n){swT=Math.min(1,(n-st)/1500);v3.draw();if(swT<1)requestAnimationFrame(f);else{swOn=false;v3.draw()}})(st)};
+
+// 4
+const p4={a:{x:6,y:3},b:{x:2,y:6}};let m4='sub';
+const v4=view('#c4',(g,w,h)=>{const G=grid(g,w,h,10),{a,b}=p4,sx=G.sx,sy=G.sy;
+ if(m4==='sub'){const r={x:a.x-b.x,y:a.y-b.y};arrow(g,sx(0),sy(0),sx(a.x),sy(a.y),A,4,'A');arrow(g,sx(0),sy(0),sx(b.x),sy(b.y),B,4,'B');arrow(g,sx(0),sy(0),sx(-b.x),sy(-b.y),'#6ff2c888',3,'−B',[6,6]);arrow(g,sx(a.x),sy(a.y),sx(r.x),sy(r.y),'#6ff2c888',3,'',[6,6]);arrow(g,sx(b.x),sy(b.y),sx(a.x),sy(a.y),R,5,'A−B');arrow(g,sx(0),sy(0),sx(r.x),sy(r.y),'#ff8a6699',3);handle(g,sx(a.x),sy(a.y),A);handle(g,sx(b.x),sy(b.y),B);$('#l4').firstChild.textContent='A − B';$('#r4').textContent=vs(r.x,r.y);$('#r4m').textContent=fmt(Math.hypot(r.x,r.y),2)}
+ else{const k=P.k,x=a.x*k,y=a.y*k;arrow(g,sx(0),sy(0),sx(x),sy(y),R,6,'kA');arrow(g,sx(0),sy(0),sx(a.x),sy(a.y),A,3,'A');handle(g,sx(a.x),sy(a.y),A);$('#l4').firstChild.textContent='k · A';$('#r4').textContent=vs(x,y,2);$('#r4m').textContent=fmt(Math.hypot(x,y),2)}});
+dragPoints($('#c4'),p4,10,()=>v4.draw());
+$('#m4a').onclick=()=>{m4='sub';$('#m4a').className='on';$('#m4b').className='';v4.draw()};$('#m4b').onclick=()=>{m4='k';$('#m4b').className='on';$('#m4a').className='';delete p4.b;p4.b={x:2,y:6};v4.draw()};
+
+// 5
+const p5={a:{x:7,y:1},b:{x:3,y:6}};
+const v5=view('#c5',(g,w,h)=>{const G=grid(g,w,h,9),{a,b}=p5,sx=G.sx,sy=G.sy,dot=a.x*b.x+a.y*b.y,ma=Math.hypot(a.x,a.y)||1,mb=Math.hypot(b.x,b.y)||1,pr=dot/ma,ux=a.x/ma,uy=a.y/ma,px=ux*pr,py=uy*pr;
+ const cos=Math.max(-1,Math.min(1,dot/(ma*mb))),col=Math.abs(dot)<1e-9?W:dot>0?B:R;
+ const f=50;dash(g,sx(-ux*f),sy(-uy*f),sx(ux*f),sy(uy*f),'#ffffff33',1,[2,6]);
+ g.fillStyle=col+'33';g.beginPath();g.moveTo(sx(0),sy(0));g.lineTo(sx(b.x),sy(b.y));g.lineTo(sx(px),sy(py));g.fill();
+ dash(g,sx(b.x),sy(b.y),sx(px),sy(py),W);arrow(g,sx(0),sy(0),sx(a.x),sy(a.y),A,4,'A');arrow(g,sx(0),sy(0),sx(b.x),sy(b.y),'#ffffffcc',3,'B');
+ g.strokeStyle=col;g.lineWidth=7;g.beginPath();g.moveTo(sx(0),sy(0));g.lineTo(sx(px),sy(py));g.stroke();
+ handle(g,sx(a.x),sy(a.y),A);handle(g,sx(b.x),sy(b.y),W);
+ $('#r5t').textContent=fmt(Math.acos(cos)/D,1)+'°';$('#r5d').textContent=fmt(dot,0);$('#r5p').textContent=fmt(pr,2)});
+dragPoints($('#c5'),p5,9,()=>v5.draw());
+
+// 6
+view('#c6',(g,w,h)=>{const u=Math.min(w,h)/15,cx=w/2-u*.4,cy=h*.62,pr=(x,y,z)=>[cx+(x-y*.0)*u*.95+y*u*.55*.75,cy-y*u*.42-z*u*.8];
+ const phi=P.ph*D,ax=P.ma,ay=0,bx=P.mb*Math.cos(phi),by=P.mb*Math.sin(phi),c=ax*by-ay*bx;
+ g.strokeStyle='#ffffff22';g.lineWidth=1;for(let i=-6;i<=6;i++){let[a,b]=pr(i,-6,0),[d,e]=pr(i,6,0);g.beginPath();g.moveTo(a,b);g.lineTo(d,e);g.stroke();[a,b]=pr(-6,i,0);[d,e]=pr(6,i,0);g.beginPath();g.moveTo(a,b);g.lineTo(d,e);g.stroke()}
+ const O=pr(0,0,0),Pa=pr(ax,ay,0),Pb=pr(bx,by,0),Pr=pr(ax+bx,ay+by,0);
+ g.fillStyle='#ffffff26';g.beginPath();g.moveTo(...O);g.lineTo(...Pa);g.lineTo(...Pr);g.lineTo(...Pb);g.fill();
+ dash(g,...Pa,...Pr,'#ffffff77');dash(g,...Pb,...Pr,'#ffffff77');
+ const z=c*.3;const Pc=pr(0,0,z);if(c<0)arrow(g,...O,...Pc,R,6,'C');
+ arrow(g,...O,...Pa,A,4,'A');arrow(g,...O,...Pb,B,4,'B');if(c>=0&&Math.abs(c)>.01)arrow(g,...O,...Pc,R,6,'C');
+ $('#r6').textContent=fmt(Math.abs(c),2);$('#r6d').textContent=Math.abs(c)<.01?'sıfır vektör':c>0?'+k̂ (yukarı)':'−k̂ (aşağı)'});
+
+// 7 oyun
+const GM={r:1,solved:0,cards:[],path:[],tg:{x:0,y:0},done:false};
+const ri=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+const POL=[[3,4],[4,3],[-3,4],[4,-3],[-4,3],[3,-4],[-4,-3],[-3,-4],[5,0],[0,-5],[0,5],[-5,0],[6,8].map(x=>x/2)];
+function round(){let s;do{s=[0,1,2].map(()=>{let v;do{v={x:ri(-6,6),y:ri(-6,6)}}while(!v.x&&!v.y);return v});if(GM.r>=4){const[a,b]=POL[ri(0,POL.length-1)];s[0]={x:a,y:b}}var tx=s[0].x+s[1].x+s[2].x,ty=s[0].y+s[1].y+s[2].y}while(Math.abs(tx)>10||Math.abs(ty)>10||(!tx&&!ty)||Math.abs(s[0].x+s[1].x)>11||Math.abs(s[0].y+s[1].y)>11);
+ const dec=[];while(dec.length<3){const v={x:ri(-6,6),y:ri(-6,6)};if(v.x||v.y)dec.push(v)}
+ const all=[...s.map((v,i)=>({...v,pol:GM.r>=4&&i===0})),...dec.map(v=>({...v,pol:false}))].sort(()=>Math.random()-.5);GM.cards=all.map(c=>({...c,used:false}));GM.tg={x:tx,y:ty};GM.path=[];GM.done=false;renderG()}
+function card(c){if(!c.pol)return vs(c.x,c.y);let t=Math.atan2(c.y,c.x)/D;if(t<0)t+=360;return `${fmt(Math.hypot(c.x,c.y),1)} birim, ${fmt(t,1)}°`}
+function renderG(){const box=$('#cards');box.innerHTML='';GM.cards.forEach((c,i)=>{const b=document.createElement('button');b.textContent=card(c);b.disabled=c.used||GM.done;b.onclick=()=>{c.used=true;GM.path.push(i);check()};box.append(b)});
+ const pos=GM.path.reduce((s,i)=>({x:s.x+GM.cards[i].x,y:s.y+GM.cards[i].y}),{x:0,y:0});
+ $('#gS').innerHTML=`Tur ${GM.r}/5 · Çözülen ${GM.solved}<br>Hedef: ${vs(GM.tg.x,GM.tg.y)}<br>Sen: ${vs(pos.x,pos.y)}`;$('#gN').textContent=GM.r>=5&&GM.done?'Yeniden oyna':'Sonraki hedef →';vG.draw()}
+function check(){const pos=GM.path.reduce((s,i)=>({x:s.x+GM.cards[i].x,y:s.y+GM.cards[i].y}),{x:0,y:0});if(pos.x===GM.tg.x&&pos.y===GM.tg.y){GM.done=true;GM.solved++;$('#gMsg').textContent=`Bayrağa ulaştın! ${GM.path.length} kart kullandın. Sırayı değiştirseydin de aynı noktaya varırdın.`}else $('#gMsg').textContent=GM.path.length?`Hedefe kalan: ${vs(GM.tg.x-pos.x,GM.tg.y-pos.y)}`:'İlk kartını seç.';renderG()}
+const vG=view('#gc',(g,w,h)=>{const G=grid(g,w,h,12),sx=G.sx,sy=G.sy,t=GM.tg;
+ g.strokeStyle=W;g.lineWidth=2;g.beginPath();g.moveTo(sx(t.x),sy(t.y));g.lineTo(sx(t.x),sy(t.y)-32);g.stroke();g.fillStyle=R;g.beginPath();g.moveTo(sx(t.x),sy(t.y)-32);g.lineTo(sx(t.x)+22,sy(t.y)-25);g.lineTo(sx(t.x),sy(t.y)-18);g.fill();g.strokeStyle=R;g.beginPath();g.arc(sx(t.x),sy(t.y),9,0,7);g.stroke();
+ let x=0,y=0;GM.path.forEach((i,n)=>{const c=GM.cards[i];arrow(g,sx(x),sy(y),sx(x+c.x),sy(y+c.y),[A,B,'#fff',R,A,B][n],4);x+=c.x;y+=c.y});g.fillStyle=W;g.beginPath();g.arc(sx(x),sy(y),6,0,7);g.fill()});
+$('#gU').onclick=()=>{if(GM.done||!GM.path.length)return;GM.cards[GM.path.pop()].used=false;check()};
+$('#gN').onclick=()=>{if(GM.r>=5&&GM.done){GM.r=1;GM.solved=0}else GM.r=Math.min(5,GM.r+1);$('#gMsg').textContent='İlk kartını seç.';round()};
+$('#gMsg').textContent='İlk kartını seç.';round();
+
+// test
+const Q=[
+['A = 3î + 4ĵ vektörünün boyu kaçtır?',['7','5','12','1'],1,'√(3² + 4²) = 5. Bileşenler doğrudan toplanmaz, çünkü birbirlerine diktir.'],
+['A = 2î − ĵ ve B = î + 3ĵ ise A + B nedir?',['3î + 2ĵ','3î + 4ĵ','î − 4ĵ','2î + 3ĵ'],0,'Bileşenleri ayrı ayrı topla: (2+1)î + (−1+3)ĵ.'],
+['Boyları 3 ve 4 olan iki vektörün toplamının boyu hangisi OLAMAZ?',['1','5','7','8'],3,'Bileşke |A−B| ile A+B arasındadır: 1 ≤ R ≤ 7.'],
+['10 birimlik vektör +x ile 30° yapıyor. Aₓ kaçtır?',['5','8,66','10','7,07'],1,'Aₓ = 10·cos 30° = 8,66. Aᵧ = 10·sin 30° = 5.'],
+['A = −3î + 3ĵ vektörünün +x ekseniyle yaptığı açı kaçtır?',['−45°','45°','135°','225°'],2,'Hesap makinesi −45° der ama vektör II. bölgede. 180° ekle: 135°.'],
+['A · B = 0 ve iki vektör de sıfırdan farklıysa ne söylenir?',['Paraleldirler','Birbirlerine diktir','Boyları eşittir','Zıt yönlüdür'],1,'A·B·cos φ = 0 ise cos φ = 0, yani φ = 90°.'],
+['î × ĵ ne eder?',['k̂','1','0','−k̂'],0,'Sağ el kuralı: x\'ten y\'ye kıvırınca başparmak +z yönünü gösterir. ĵ × î ise −k̂ olur.'],
+['Skaler çarpımın sonucu nedir?',['Bir vektör','Yönlü bir sayı','Yalnızca bir sayı','Daima pozitif bir sayı'],2,'Sonuç yönsüz bir sayıdır ve negatif de olabilir.']];
+let qR=0,qD=0;$('#quiz').innerHTML=Q.map(([q,o],i)=>`<div class="q" data-i="${i}"><h3>${i+1}. ${q}</h3><div class="o">${o.map(x=>`<button>${x}</button>`).join('')}</div></div>`).join('');
+$$('.q').forEach(c=>{const[, ,r,w]=Q[+c.dataset.i],bs=[...c.querySelectorAll('button')];bs.forEach((b,j)=>b.onclick=()=>{bs.forEach(x=>x.disabled=true);bs[r].classList.add('yes');if(j!==r)b.classList.add('no');else qR++;qD++;const p=document.createElement('p');p.className='why';p.textContent=w;c.append(p);$('#qs').textContent=`Doğru: ${qR} / ${qD}`})});
+
+new ResizeObserver(drawAll).observe(document.body);drawAll();if(document.fonts)document.fonts.ready.then(drawAll);
+</script>
+<script>window.X_DATA={hints:{"t1": "Birinci yürüyüşten sonra ne kadar döndüğün. 0° düz devam, 180° geri dönüş.", "k": "Sayı, okun boyunu değiştirir; eksi değer yönünü ters çevirir.", "ma": "A okunun uzunluğu.", "mb": "B okunun uzunluğu.", "ph": "Eksi yaparsan C oku aşağı döner: çarpımda sıra önemlidir."},gens:(R,C,n)=>[
+ ()=>{const[a,b]=C([[3,4],[6,8],[5,12],[8,15],[9,12]]);return{q:`A = ${a}î + ${b}ĵ vektörünün boyu kaçtır?`,a:Math.hypot(a,b),s:[`|A| = √(${a}² + ${b}²)`,`|A| = √${a*a+b*b} = ${Math.hypot(a,b)}`]}},
+ ()=>{const a=R(-6,6)||2,b=R(-6,6)||3,c=R(-6,6)||1,d=R(-6,6)||4,x=a+c,y=b+d;return{q:`A = (${a}, ${b}) ve B = (${c}, ${d}). A + B vektörünün boyu kaçtır?`,a:Math.hypot(x,y),s:[`R = (${a}+(${c}), ${b}+(${d})) = (${x}, ${y})`,`|R| = √(${x*x} + ${y*y}) = ${n(Math.hypot(x,y))}`]}},
+ ()=>{const m=R(2,10)*5,th=C([30,45,60]);return{q:`Boyu ${m} birim olan vektör +x ekseniyle ${th}° yapıyor. Aₓ kaçtır?`,a:m*Math.cos(th*Math.PI/180),s:[`Aₓ = A·cos θ`,`Aₓ = ${m}·cos ${th}° = ${n(m*Math.cos(th*Math.PI/180))}`]}},
+ ()=>{const m=R(2,10)*5,th=C([30,45,60]);return{q:`Boyu ${m} birim olan vektör +x ekseniyle ${th}° yapıyor. Aᵧ kaçtır?`,a:m*Math.sin(th*Math.PI/180),s:[`Aᵧ = A·sin θ`,`Aᵧ = ${m}·sin ${th}° = ${n(m*Math.sin(th*Math.PI/180))}`]}},
+ ()=>{const a=R(-6,6),b=R(-6,6),c=R(-6,6),d=R(-6,6);return{q:`A = (${a}, ${b}) ve B = (${c}, ${d}) için A · B kaçtır?`,a:a*c+b*d,s:[`A · B = AₓBₓ + AᵧBᵧ`,`= (${a})(${c}) + (${b})(${d}) = ${a*c+b*d}`]}},
+ ()=>{const a=R(1,6),b=R(-5,6),c=R(-5,6),d=R(1,6);return{q:`A = ${a}î + (${b})ĵ ve B = ${c}î + ${d}ĵ için A × B vektörünün k̂ bileşeni kaçtır?`,a:a*d-b*c,s:[`C_z = AₓBᵧ − AᵧBₓ`,`= (${a})(${d}) − (${b})(${c}) = ${a*d-b*c}`]}},
+ ()=>{const a=R(1,8),b=R(1,8),t=180-Math.atan(b/a)*180/Math.PI;return{q:`A = −${a}î + ${b}ĵ vektörünün +x ekseniyle yaptığı açı kaç derecedir? (0°–360°)`,a:t,t:.6,u:'°',s:[`tan⁻¹(${b}/−${a}) = ${n(t-180)}°, ama vektör II. bölgede`,`180° ekle: θ = ${n(t)}°`]}},
+ ()=>{const a=R(2,9),b=R(2,9),ph=C([0,60,90,120,180]),r=Math.sqrt(a*a+b*b+2*a*b*Math.cos(ph*Math.PI/180));return{q:`Boyları ${a} ve ${b} olan iki vektör arasındaki açı ${ph}°. Toplamlarının boyu kaçtır?`,a:r,s:[`R² = A² + B² + 2AB·cos φ`,`R² = ${a*a} + ${b*b} + 2·${a}·${b}·cos ${ph}°`,`R = ${n(r)}`]}}
+],example:{"q": "Bir halkaya iki kuvvet etki ediyor: A = 10 N, +x ile 37° yapıyor (sin 37° = 0,6; cos 37° = 0,8). B = 2 N, −x yönünde. Bileşke kuvvetin boyunu ve yönünü bul.", "steps": [["Her vektörü bileşenlerine ayır.", "Aₓ = 10·0,8 = 8 N &nbsp; Aᵧ = 10·0,6 = 6 N"], ["B yalnızca x ekseninde ve negatif yönde.", "Bₓ = −2 N &nbsp; Bᵧ = 0"], ["Aynı eksendeki bileşenleri topla.", "Rₓ = 8 − 2 = 6 N &nbsp; Rᵧ = 6 + 0 = 6 N"], ["Boyu Pisagor ile bul.", "|R| = √(6² + 6²) = 6√2 ≈ 8,49 N"], ["Yönü tan⁻¹ ile bul. İki bileşen de pozitif, yani I. bölgedeyiz; açı düzeltmesi gerekmez.", "θ = tan⁻¹(6/6) = 45°"]]},cards:[["Skaler", "Yalnızca büyüklüğü olan nicelik: kütle, sıcaklık, zaman, enerji."], ["Vektör", "Büyüklüğü ve yönü olan nicelik: yer değiştirme, hız, kuvvet."], ["Birim vektör", "Boyu 1 olan, yalnızca yön gösteren vektör: î, ĵ, k̂."], ["Bileşen", "Vektörün bir eksen üzerindeki izdüşümü. Aₓ = A cos θ, Aᵧ = A sin θ."], ["Bileşke", "Vektörlerin toplamı. Bileşenler ayrı ayrı toplanarak bulunur."], ["Paralel kenar kuralı", "İki vektör aynı noktadan çizilir, köşegen bileşkeyi verir."], ["Toplama sınırı", "İki vektörün toplamının boyu |A−B| ile A+B arasındadır."], ["Skaler çarpım", "A·B·cos φ. Sonuç bir sayıdır. Dik vektörlerde sıfırdır."], ["Vektörel çarpım", "Boyu A·B·sin φ, yönü sağ el kuralıyla bulunur. Paralel vektörlerde sıfırdır."], ["Açı tuzağı", "Aₓ negatifse tan⁻¹ sonucuna 180° eklenmelidir."]]};
+(function(){
+const D=window.X_DATA,$a=s=>[...document.querySelectorAll(s)],q=s=>document.querySelector(s);
+const nf=(x,st)=>{const d=st>=1?0:st>=.1&&Math.abs(st*10-Math.round(st*10))<1e-9?1:2;return x.toFixed(d).replace('.',',').replace('-','−')};
+function fill(i){const mn=+i.min,mx=+i.max,p=x=>(x-mn)/(mx-mn)*100,v=+i.value,o=mn<0&&mx>0?0:mn,a=Math.min(p(o),p(v)),b=Math.max(p(o),p(v));i.style.setProperty('--a',a+'%');i.style.setProperty('--b',b+'%')}
+window.refreshSliders=()=>$a('input.sl').forEach(fill);
+$a('[data-s]').forEach(e=>{const[id,,mn,mx,st,,u]=e.dataset.s.split('|'),i=e.querySelector('input');if(!i)return;i.classList.add('sl');
+ const row=document.createElement('div');row.className='slrow';const mk=(t,s,l)=>{const b=document.createElement('button');b.type='button';b.textContent=t;b.setAttribute('aria-label',l);let tm;const go=()=>{const nv=Math.max(+mn,Math.min(+mx,+i.value+s*(+st)));i.value=nv;i.dispatchEvent(new Event('input',{bubbles:true}))};
+  b.addEventListener('click',ev=>{if(ev.detail===0)go()});b.addEventListener('pointerdown',ev=>{ev.preventDefault();go();tm=setTimeout(function r(){go();tm=setTimeout(r,70)},380)});['pointerup','pointerleave','pointercancel'].forEach(n=>b.addEventListener(n,()=>clearTimeout(tm)));return b};
+ i.replaceWith(row);row.append(mk('−',-1,'Azalt'),i,mk('+',1,'Artır'));
+ const sc=document.createElement('div');sc.className='slscale';sc.innerHTML=`<span class="mn">${nf(+mn,+st)}${u?' '+u:''}</span>${+mn<0&&+mx>0?`<span class="zr" style="left:${-mn/(mx-mn)*100}%">0</span>`:''}<span class="mx">${nf(+mx,+st)}${u?' '+u:''}</span>`;row.after(sc);
+ const h=D.hints[id];if(h){const p=document.createElement('p');p.className='slhint';p.textContent=h;sc.after(p)}
+ i.addEventListener('input',()=>fill(i));fill(i)});
+$a('.ctl').forEach(c=>{const d=document.createElement('div');d.className='slcap';d.textContent='Ayarlar: çubuğu sürükle ya da − / + düğmesine bas. Sonuç anında değişir.';c.prepend(d)});
+
+// soru makinesi
+const R=(a,b)=>a+Math.floor(Math.random()*(b-a+1)),C=a=>a[R(0,a.length-1)],n=x=>String(Math.round(x*100)/100).replace('.',',').replace('-','−');
+const gens=D.gens(R,C,n);let cur,seen=0,good=0,run=0,answered=false,lastG=-1;
+function next(){let k;do{k=R(0,gens.length-1)}while(k===lastG&&gens.length>1);lastG=k;cur=gens[k]();answered=false;q('#xmq').textContent=cur.q;q('#xmu').textContent=cur.u||'';const i=q('#xmi');i.value='';q('#xmr').textContent='';q('#xmr').className='xres';q('#xms').innerHTML='';q('#xmc').textContent='Kontrol et'}
+function stat(){q('#xm1').textContent=good+' / '+seen;q('#xm2').textContent=run}
+function show(){q('#xms').innerHTML=cur.s.map(x=>`<li>${x}</li>`).join('')}
+q('#xmc').onclick=()=>{if(answered)return next();const v=parseFloat(q('#xmi').value.replace(',','.').replace('−','-')),r=q('#xmr');if(isNaN(v)){r.textContent='Önce sayısal bir cevap yaz.';r.className='xres bad';return}
+ const ok=Math.abs(v-cur.a)<=Math.max(cur.t||0,Math.abs(cur.a)*.01,.011);seen++;answered=true;if(ok){good++;run++;r.textContent='Doğru!';r.className='xres ok'}else{run=0;r.textContent='Doğru cevap: '+n(cur.a)+(cur.u?' '+cur.u:'');r.className='xres bad'}show();stat();q('#xmc').textContent='Yeni soru →'};
+q('#xmn').onclick=()=>{if(answered)next();else{show();q('#xmr').textContent='Doğru cevap: '+n(cur.a)+(cur.u?' '+cur.u:'');q('#xmr').className='xres';answered=true;q('#xmc').textContent='Yeni soru →'}};
+q('#xmi').addEventListener('keydown',e=>{if(e.key==='Enter')q('#xmc').click()});
+next();stat();
+
+// çözümlü örnek
+const ex=D.example;q('#xeq').textContent=ex.q;let si=0;const ol=q('#xel'),nb=q('#xen');
+function step(){if(si>=ex.steps.length){si=0;ol.innerHTML='';nb.textContent='İlk adımı göster';return}const[t,c]=ex.steps[si++],li=document.createElement('li');li.innerHTML=`<i>${si}.</i><div>${t}<code>${c}</code></div>`;ol.append(li);nb.textContent=si>=ex.steps.length?'Baştan başla':'Sonraki adım →'}
+nb.onclick=step;nb.textContent='İlk adımı göster';
+
+// kartlar
+q('#xcs').innerHTML=D.cards.map(([a,b])=>`<button class="xc" type="button" aria-label="${a}: kartı çevir"><span class="xci"><span class="xf"><b>${a}</b><small>Çevirmek için dokun</small></span><span class="xf bk"><span>${b}</span><small>${a}</small></span></span></button>`).join('');
+$a('.xc').forEach(c=>c.onclick=()=>c.classList.toggle('fl'));
+if(typeof drawAll==='function'){drawAll();requestAnimationFrame(drawAll)}
+})();
+</script>
+</body>
+</html>
